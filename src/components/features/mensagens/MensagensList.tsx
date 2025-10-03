@@ -29,9 +29,9 @@ import {
   BellOutlined,
   SendOutlined
 } from '@ant-design/icons';
-import { useAuth } from '../contexts/AuthContext';
-import apiService from '../services/api';
-import { Mensagem } from '../types';
+import { useAuth } from '../../../contexts/AuthContext';
+import apiService from '../../../services/api';
+import { Mensagem } from '../../../types';
 
 const { Option } = Select;
 const { TextArea } = Input;

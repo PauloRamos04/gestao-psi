@@ -28,9 +28,9 @@ import {
   EyeOutlined,
   CalendarOutlined
 } from '@ant-design/icons';
-import { useAuth } from '../contexts/AuthContext';
-import apiService from '../services/api';
-import { Pagamento, Paciente, TipoPagamento, FiltroPeriodo } from '../types';
+import { useAuth } from '../../../contexts/AuthContext';
+import apiService from '../../../services/api';
+import { Pagamento, Paciente, TipoPagamento, FiltroPeriodo } from '../../../types';
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;

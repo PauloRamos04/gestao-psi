@@ -26,9 +26,9 @@ import {
   ReloadOutlined,
   EyeOutlined
 } from '@ant-design/icons';
-import { useAuth } from '../contexts/AuthContext';
-import apiService from '../services/api';
-import { Paciente, Clinica, Psicologo } from '../types';
+import { useAuth } from '../../../contexts/AuthContext';
+import apiService from '../../../services/api';
+import { Paciente, Clinica, Psicologo } from '../../../types';
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;

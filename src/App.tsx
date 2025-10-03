@@ -1,67 +1,37 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import Layout from './components/Layout';
-import Login from './components/Login';
-import Dashboard from './components/Dashboard';
-import UsuariosList from './components/UsuariosList';
-import SessoesList from './components/SessoesList';
-import PacientesList from './components/PacientesList';
-import PagamentosList from './components/PagamentosList';
-import FaturamentoPage from './components/FaturamentoPage';
-import MensagensList from './components/MensagensList';
-import ClinicasList from './components/ClinicasList';
-import SalasList from './components/SalasList';
+import { AuthProvider } from './contexts/AuthContext';
 
-// Novas páginas implementadas
-import IMCCalculator from './components/IMCCalculator';
-import LifeTimeCalculator from './components/LifeTimeCalculator';
-import SessionTimer from './components/SessionTimer';
-import ColorChooser from './components/ColorChooser';
-import PasswordChange from './components/PasswordChange';
-import ReportsPage from './components/ReportsPage';
-import HistoryPage from './components/HistoryPage';
-import SublocationsPage from './components/SublocationsPage';
-import InteractionsPage from './components/InteractionsPage';
-import DownloadsPage from './components/DownloadsPage';
+// Layout Components
+import { ProtectedRoute, PublicRoute } from './components/layout';
 
-// Componente para proteger rotas que precisam de autenticação
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+// Pages
+import {
+  Login,
+  Dashboard,
+  FaturamentoPage,
+  ReportsPage,
+  HistoryPage,
+  SublocationsPage,
+  InteractionsPage,
+  DownloadsPage,
+} from './pages';
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return <Layout>{children}</Layout>;
-};
-
-// Componente para rotas públicas (como login)
-const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-      </div>
-    );
-  }
-
-  if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  return <>{children}</>;
-};
+// Feature Components
+import {
+  UsuariosList,
+  PacientesList,
+  SessoesList,
+  PagamentosList,
+  ClinicasList,
+  SalasList,
+  MensagensList,
+  IMCCalculator,
+  LifeTimeCalculator,
+  SessionTimer,
+  ColorChooser,
+  PasswordChange,
+} from './components/features';
 
 
 const App: React.FC = () => {

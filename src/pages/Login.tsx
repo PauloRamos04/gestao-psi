@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import {
   Card,
@@ -9,10 +8,8 @@ import {
   Typography,
   Space,
   Alert,
-  Spin,
   Row,
   Col,
-  Avatar,
   Divider,
   Image
 } from 'antd';
@@ -22,7 +19,6 @@ import {
   EyeInvisibleOutlined,
   EyeTwoTone,
   LoginOutlined,
-  HeartOutlined,
   SafetyOutlined
 } from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
@@ -141,63 +137,42 @@ const Login: React.FC = () => {
                   justifyContent: 'center'
                 }}>
                   <div style={{
-                    width: '100px',
-                    height: '100px',
+                    width: '120px',
+                    height: '120px',
                     borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    background: '#667eea',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: '0 10px 30px rgba(102, 126, 234, 0.3)',
-                    position: 'relative',
-                    overflow: 'hidden'
+                    boxShadow: '0 4px 16px rgba(102, 126, 234, 0.2)',
                   }}>
                     <Image
                       src={newLogo}
                       alt="Logo Gestão PSI"
                       preview={false}
                       style={{
-                        width: '80px',
-                        height: '80px',
+                        width: '100px',
+                        height: '100px',
                         borderRadius: '50%',
                         objectFit: 'cover'
                       }}
                       fallback="/logo-gestaopsi.jpg"
                     />
                   </div>
-                  <div style={{
-                    position: 'absolute',
-                    top: '-5px',
-                    right: '-5px',
-                    width: '30px',
-                    height: '30px',
-                    borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #52c41a 0%, #73d13d 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 4px 12px rgba(82, 196, 26, 0.3)'
-                  }}>
-                    <SafetyOutlined style={{ fontSize: '16px', color: 'white' }} />
-                  </div>
                 </div>
                 
                 <div style={{ textAlign: 'center' }}>
                   <Title level={1} style={{ 
                     margin: 0, 
-                    color: '#1f2937',
+                    color: '#667eea',
                     fontWeight: '700',
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text'
                   }}>
                     Gestão PSI
                   </Title>
                   <Text style={{ 
-                    fontSize: '16px',
+                    fontSize: '14px',
                     color: '#64748b',
-                    fontWeight: '500'
+                    fontWeight: '400'
                   }}>
                     Sistema de Gestão para Clínicas de Psicologia
                   </Text>
@@ -241,20 +216,6 @@ const Login: React.FC = () => {
                   <Input
                     prefix={<UserOutlined style={{ color: '#9ca3af' }} />}
                     placeholder="Digite seu usuário"
-                    style={{ 
-                      borderRadius: '12px',
-                      height: '48px',
-                      border: '2px solid #e5e7eb',
-                      transition: 'all 0.3s ease'
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = '#667eea';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = '#e5e7eb';
-                      e.target.style.boxShadow = 'none';
-                    }}
                   />
                 </Form.Item>
 
@@ -267,20 +228,6 @@ const Login: React.FC = () => {
                     prefix={<LockOutlined style={{ color: '#9ca3af' }} />}
                     placeholder="Digite sua senha"
                     iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
-                    style={{ 
-                      borderRadius: '12px',
-                      height: '48px',
-                      border: '2px solid #e5e7eb',
-                      transition: 'all 0.3s ease'
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = '#667eea';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = '#e5e7eb';
-                      e.target.style.boxShadow = 'none';
-                    }}
                   />
                 </Form.Item>
 
@@ -292,22 +239,9 @@ const Login: React.FC = () => {
                     icon={<LoginOutlined />}
                     style={{
                       width: '100%',
-                      height: '52px',
-                      borderRadius: '12px',
+                      height: '48px',
                       fontSize: '16px',
-                      fontWeight: '600',
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      border: 'none',
-                      boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)',
-                      transition: 'all 0.3s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.boxShadow = '0 12px 35px rgba(102, 126, 234, 0.4)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 8px 25px rgba(102, 126, 234, 0.3)';
+                      fontWeight: '500',
                     }}
                   >
                     {loading ? 'Entrando...' : 'Entrar no Sistema'}

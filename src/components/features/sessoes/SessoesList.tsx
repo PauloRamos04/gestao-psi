@@ -30,9 +30,9 @@ import {
   CheckCircleOutlined,
   ExclamationCircleOutlined
 } from '@ant-design/icons';
-import { useAuth } from '../contexts/AuthContext';
-import { Sessao, FiltroPeriodo, FiltroDia } from '../types';
-import apiService from '../services/api';
+import { useAuth } from '../../../contexts/AuthContext';
+import { Sessao, FiltroPeriodo, FiltroDia } from '../../../types';
+import apiService from '../../../services/api';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import dayjs from 'dayjs';

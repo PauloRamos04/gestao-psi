@@ -21,42 +21,59 @@ import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
-  BankOutlined,
+  EnvironmentOutlined,
   SearchOutlined,
   ReloadOutlined,
   EyeOutlined,
-  UserOutlined
+  BankOutlined
 } from '@ant-design/icons';
-import { useAuth } from '../contexts/AuthContext';
-import apiService from '../services/api';
-import { Clinica } from '../types';
+import { useAuth } from '../../../contexts/AuthContext';
+import apiService from '../../../services/api';
+import { Sala, Clinica } from '../../../types';
 
 const { Option } = Select;
 
-const ClinicasList: React.FC = () => {
+const SalasList: React.FC = () => {
   const { user } = useAuth();
+  const [salas, setSalas] = useState<Sala[]>([]);
   const [clinicas, setClinicas] = useState<Clinica[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [editingClinica, setEditingClinica] = useState<Clinica | null>(null);
+  const [editingSala, setEditingSala] = useState<Sala | null>(null);
   const [form] = Form.useForm();
   const [searchText, setSearchText] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [clinicaFilter, setClinicaFilter] = useState<number | undefined>(undefined);
 
   // Estatísticas
-  const totalClinicas = clinicas.length;
-  const clinicasAtivas = clinicas.filter(c => c.status).length;
-  const clinicasInativas = clinicas.filter(c => !c.status).length;
+  const totalSalas = salas.length;
+  const salasPorClinica = salas.reduce((acc, sala) => {
+    const clinicaNome = sala.clinica?.nome || 'Sem clínica';
+    acc[clinicaNome] = (acc[clinicaNome] || 0) + 1;
+    return acc;
+  }, {} as { [key: string]: number });
 
   useEffect(() => {
+    loadSalas();
     loadClinicas();
   }, []);
 
-  const loadClinicas = async () => {
+  const loadSalas = async () => {
+    if (!user?.clinicaId) return;
+    
     setLoading(true);
     try {
-      // Como não temos um endpoint específico para listar clínicas,
-      // vamos simular com dados mockados
+      const data = await apiService.getSalas(user.clinicaId);
+      setSalas(data);
+    } catch (error) {
+      message.error('Erro ao carregar salas');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadClinicas = async () => {
+    try {
+      // Mock de clínicas para o filtro
       const mockClinicas: Clinica[] = [
         {
           id: 1,
@@ -71,36 +88,25 @@ const ClinicasList: React.FC = () => {
           nome: 'Centro de Psicologia Avançada',
           status: true,
           titulo: 'Centro Avançado'
-        },
-        {
-          id: 3,
-          clinicaLogin: 'clinica3',
-          nome: 'Instituto de Saúde Mental',
-          status: false,
-          titulo: 'Instituto Saúde'
         }
       ];
       setClinicas(mockClinicas);
     } catch (error) {
-      message.error('Erro ao carregar clínicas');
-    } finally {
-      setLoading(false);
+      console.error('Erro ao carregar clínicas:', error);
     }
   };
 
   const handleAdd = () => {
-    setEditingClinica(null);
+    setEditingSala(null);
     form.resetFields();
     setModalVisible(true);
   };
 
-  const handleEdit = (clinica: Clinica) => {
-    setEditingClinica(clinica);
+  const handleEdit = (sala: Sala) => {
+    setEditingSala(sala);
     form.setFieldsValue({
-      clinicaLogin: clinica.clinicaLogin,
-      nome: clinica.nome,
-      titulo: clinica.titulo,
-      status: clinica.status
+      nome: sala.nome,
+      clinicaId: sala.clinicaId
     });
     setModalVisible(true);
   };
@@ -108,10 +114,10 @@ const ClinicasList: React.FC = () => {
   const handleDelete = async (id: number) => {
     try {
       // Aqui você implementaria a chamada para deletar
-      message.success('Clínica removida com sucesso');
-      loadClinicas();
+      message.success('Sala removida com sucesso');
+      loadSalas();
     } catch (error) {
-      message.error('Erro ao remover clínica');
+      message.error('Erro ao remover sala');
     }
   };
 
@@ -119,36 +125,33 @@ const ClinicasList: React.FC = () => {
     try {
       const values = await form.validateFields();
       
-      if (editingClinica) {
-        // Atualizar clínica existente
-        message.success('Clínica atualizada com sucesso');
+      if (editingSala) {
+        // Atualizar sala existente
+        message.success('Sala atualizada com sucesso');
       } else {
-        // Criar nova clínica
-        message.success('Clínica criada com sucesso');
+        // Criar nova sala
+        message.success('Sala criada com sucesso');
       }
       
       setModalVisible(false);
-      loadClinicas();
+      loadSalas();
     } catch (error) {
-      message.error('Erro ao salvar clínica');
+      message.error('Erro ao salvar sala');
     }
   };
 
   const handleModalCancel = () => {
     setModalVisible(false);
-    setEditingClinica(null);
+    setEditingSala(null);
     form.resetFields();
   };
 
-  const filteredClinicas = clinicas.filter(clinica => {
-    const matchesSearch = clinica.nome.toLowerCase().includes(searchText.toLowerCase()) ||
-                         clinica.titulo.toLowerCase().includes(searchText.toLowerCase()) ||
-                         clinica.clinicaLogin.toLowerCase().includes(searchText.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || 
-      (statusFilter === 'active' && clinica.status) ||
-      (statusFilter === 'inactive' && !clinica.status);
+  const filteredSalas = salas.filter(sala => {
+    const matchesSearch = sala.nome.toLowerCase().includes(searchText.toLowerCase()) ||
+                         sala.clinica?.nome.toLowerCase().includes(searchText.toLowerCase());
+    const matchesClinica = !clinicaFilter || sala.clinicaId === clinicaFilter;
     
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesClinica;
   });
 
   const columns = [
@@ -159,47 +162,44 @@ const ClinicasList: React.FC = () => {
       width: 80,
     },
     {
-      title: 'Clínica',
+      title: 'Sala',
       dataIndex: 'nome',
       key: 'nome',
-      render: (text: string, record: Clinica) => (
+      render: (text: string, record: Sala) => (
         <div className="flex items-center">
           <Avatar 
-            icon={<BankOutlined />} 
-            style={{ backgroundColor: record.status ? '#1890ff' : '#d9d9d9', marginRight: 12 }}
+            icon={<EnvironmentOutlined />} 
+            style={{ backgroundColor: '#52c41a', marginRight: 12 }}
           />
           <div>
             <div style={{ fontWeight: 500 }}>{text}</div>
             <div style={{ fontSize: '12px', color: '#666' }}>
-              {record.titulo}
+              ID: {record.id}
             </div>
           </div>
         </div>
       ),
     },
     {
-      title: 'Login',
-      dataIndex: 'clinicaLogin',
-      key: 'clinicaLogin',
-      render: (text: string) => (
-        <Tag color="blue">{text}</Tag>
-      ),
-    },
-    {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: boolean) => (
-        <Tag color={status ? 'green' : 'red'}>
-          {status ? 'Ativa' : 'Inativa'}
-        </Tag>
+      title: 'Clínica',
+      dataIndex: ['clinica', 'nome'],
+      key: 'clinica',
+      render: (text: string, record: Sala) => (
+        <div className="flex items-center">
+          <Avatar 
+            icon={<BankOutlined />} 
+            size="small"
+            style={{ backgroundColor: '#1890ff', marginRight: 8 }}
+          />
+          <span>{text || 'Sem clínica'}</span>
+        </div>
       ),
     },
     {
       title: 'Ações',
       key: 'actions',
       width: 150,
-      render: (_: any, record: Clinica) => (
+      render: (_: any, record: Sala) => (
         <Space size="small">
           <Tooltip title="Visualizar">
             <Button
@@ -217,7 +217,7 @@ const ClinicasList: React.FC = () => {
             />
           </Tooltip>
           <Popconfirm
-            title="Tem certeza que deseja remover esta clínica?"
+            title="Tem certeza que deseja remover esta sala?"
             onConfirm={() => handleDelete(record.id)}
             okText="Sim"
             cancelText="Não"
@@ -241,15 +241,15 @@ const ClinicasList: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Clínicas</h1>
-          <p className="text-gray-600">Gerencie as clínicas do sistema</p>
+          <h1 className="text-2xl font-bold text-gray-900">Salas</h1>
+          <p className="text-gray-600">Gerencie as salas das clínicas</p>
         </div>
         <Button
           type="primary"
           icon={<PlusOutlined />}
           onClick={handleAdd}
         >
-          Nova Clínica
+          Nova Sala
         </Button>
       </div>
 
@@ -258,8 +258,17 @@ const ClinicasList: React.FC = () => {
         <Col span={6}>
           <Card>
             <Statistic
-              title="Total de Clínicas"
-              value={totalClinicas}
+              title="Total de Salas"
+              value={totalSalas}
+              prefix={<EnvironmentOutlined />}
+            />
+          </Card>
+        </Col>
+        <Col span={6}>
+          <Card>
+            <Statistic
+              title="Clínicas com Salas"
+              value={Object.keys(salasPorClinica).length}
               prefix={<BankOutlined />}
             />
           </Card>
@@ -267,27 +276,18 @@ const ClinicasList: React.FC = () => {
         <Col span={6}>
           <Card>
             <Statistic
-              title="Clínicas Ativas"
-              value={clinicasAtivas}
-              valueStyle={{ color: '#3f8600' }}
+              title="Média por Clínica"
+              value={Object.keys(salasPorClinica).length > 0 ? (totalSalas / Object.keys(salasPorClinica).length).toFixed(1) : 0}
+              prefix={<EnvironmentOutlined />}
             />
           </Card>
         </Col>
         <Col span={6}>
           <Card>
             <Statistic
-              title="Clínicas Inativas"
-              value={clinicasInativas}
-              valueStyle={{ color: '#cf1322' }}
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title="Taxa de Ativas"
-              value={totalClinicas > 0 ? ((clinicasAtivas / totalClinicas) * 100).toFixed(1) : 0}
-              suffix="%"
+              title="Sua Clínica"
+              value={salas.filter(s => s.clinicaId === user?.clinicaId).length}
+              prefix={<BankOutlined />}
               valueStyle={{ color: '#1890ff' }}
             />
           </Card>
@@ -299,7 +299,7 @@ const ClinicasList: React.FC = () => {
         <Row gutter={16} align="middle">
           <Col span={8}>
             <Input
-              placeholder="Buscar por nome, título ou login..."
+              placeholder="Buscar por nome da sala ou clínica..."
               prefix={<SearchOutlined />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
@@ -308,20 +308,23 @@ const ClinicasList: React.FC = () => {
           </Col>
           <Col span={4}>
             <Select
-              placeholder="Status"
-              value={statusFilter}
-              onChange={setStatusFilter}
+              placeholder="Filtrar por clínica"
+              value={clinicaFilter}
+              onChange={setClinicaFilter}
               style={{ width: '100%' }}
+              allowClear
             >
-              <Option value="all">Todas</Option>
-              <Option value="active">Ativas</Option>
-              <Option value="inactive">Inativas</Option>
+              {clinicas.map(clinica => (
+                <Option key={clinica.id} value={clinica.id}>
+                  {clinica.nome}
+                </Option>
+              ))}
             </Select>
           </Col>
           <Col span={4}>
             <Button
               icon={<ReloadOutlined />}
-              onClick={loadClinicas}
+              onClick={loadSalas}
               loading={loading}
             >
               Atualizar
@@ -334,7 +337,7 @@ const ClinicasList: React.FC = () => {
       <Card>
         <Table
           columns={columns}
-          dataSource={filteredClinicas}
+          dataSource={filteredSalas}
           rowKey="id"
           loading={loading}
           pagination={{
@@ -342,14 +345,14 @@ const ClinicasList: React.FC = () => {
             showSizeChanger: true,
             showQuickJumper: true,
             showTotal: (total, range) =>
-              `${range[0]}-${range[1]} de ${total} clínicas`,
+              `${range[0]}-${range[1]} de ${total} salas`,
           }}
         />
       </Card>
 
       {/* Modal de Adicionar/Editar */}
       <Modal
-        title={editingClinica ? 'Editar Clínica' : 'Nova Clínica'}
+        title={editingSala ? 'Editar Sala' : 'Nova Sala'}
         open={modalVisible}
         onOk={handleModalOk}
         onCancel={handleModalCancel}
@@ -359,51 +362,31 @@ const ClinicasList: React.FC = () => {
           form={form}
           layout="vertical"
           initialValues={{
-            status: true
+            clinicaId: user?.clinicaId
           }}
         >
           <Form.Item
-            name="clinicaLogin"
-            label="Login da Clínica"
-            rules={[
-              { required: true, message: 'Por favor, insira o login da clínica' },
-              { min: 3, message: 'Login deve ter pelo menos 3 caracteres' },
-              { pattern: /^[a-zA-Z0-9_]+$/, message: 'Login deve conter apenas letras, números e underscore' }
-            ]}
-          >
-            <Input placeholder="Digite o login da clínica" />
-          </Form.Item>
-
-          <Form.Item
             name="nome"
-            label="Nome da Clínica"
+            label="Nome da Sala"
             rules={[
-              { required: true, message: 'Por favor, insira o nome da clínica' },
-              { min: 3, message: 'Nome deve ter pelo menos 3 caracteres' }
+              { required: true, message: 'Por favor, insira o nome da sala' },
+              { min: 2, message: 'Nome deve ter pelo menos 2 caracteres' }
             ]}
           >
-            <Input placeholder="Digite o nome completo da clínica" />
+            <Input placeholder="Digite o nome da sala" />
           </Form.Item>
 
           <Form.Item
-            name="titulo"
-            label="Título"
-            rules={[
-              { required: true, message: 'Por favor, insira o título da clínica' },
-              { min: 2, message: 'Título deve ter pelo menos 2 caracteres' }
-            ]}
+            name="clinicaId"
+            label="Clínica"
+            rules={[{ required: true, message: 'Por favor, selecione a clínica' }]}
           >
-            <Input placeholder="Digite o título da clínica" />
-          </Form.Item>
-
-          <Form.Item
-            name="status"
-            label="Status"
-            rules={[{ required: true, message: 'Por favor, selecione o status' }]}
-          >
-            <Select placeholder="Selecione o status">
-              <Option value={true}>Ativa</Option>
-              <Option value={false}>Inativa</Option>
+            <Select placeholder="Selecione a clínica">
+              {clinicas.map(clinica => (
+                <Option key={clinica.id} value={clinica.id}>
+                  {clinica.nome}
+                </Option>
+              ))}
             </Select>
           </Form.Item>
         </Form>
@@ -412,4 +395,4 @@ const ClinicasList: React.FC = () => {
   );
 };
 
-export default ClinicasList;
+export default SalasList;

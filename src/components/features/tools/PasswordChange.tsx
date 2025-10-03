@@ -21,7 +21,7 @@ import {
   CloseCircleOutlined,
   SecurityScanOutlined
 } from '@ant-design/icons';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../../contexts/AuthContext';
 
 const { Title, Text, Paragraph } = Typography;
 

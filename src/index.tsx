@@ -5,6 +5,8 @@ import ptBR from 'antd/locale/pt_BR';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import newLogo from './assets/newlogo-gestaopsi.png';
+import { colors, typography, borderRadius } from './theme';
+import './styles/global.css';
 
 // Força atualização do favicon e apple-touch-icon com a nova logo
 (() => {
@@ -39,12 +41,39 @@ root.render(
       locale={ptBR}
       theme={{
         token: {
-          colorPrimary: '#1890ff',
-          colorSuccess: '#52c41a',
-          colorWarning: '#faad14',
-          colorError: '#ff4d4f',
-          borderRadius: 6,
-          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          colorPrimary: colors.primary[500],
+          colorSuccess: colors.success[500],
+          colorWarning: colors.warning[500],
+          colorError: colors.error[500],
+          colorInfo: colors.info[500],
+          borderRadius: 8,
+          borderRadiusLG: 12,
+          borderRadiusSM: 6,
+          fontFamily: typography.fontFamily.primary,
+          controlHeight: 40,
+          fontSize: 14,
+        },
+        components: {
+          Button: {
+            borderRadius: 8,
+            controlHeight: 40,
+            fontWeight: 500,
+            primaryShadow: 'none',
+          },
+          Input: {
+            borderRadius: 8,
+            controlHeight: 40,
+          },
+          Select: {
+            borderRadius: 8,
+            controlHeight: 40,
+          },
+          Card: {
+            borderRadius: 12,
+          },
+          Modal: {
+            borderRadius: 12,
+          },
         },
       }}
     >

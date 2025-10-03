@@ -25,8 +25,8 @@ import {
   ExclamationCircleOutlined,
   ReloadOutlined
 } from '@ant-design/icons';
-import { Usuario } from '../types';
-import apiService from '../services/api';
+import { Usuario } from '../../../types';
+import apiService from '../../../services/api';
 
 const { Title, Text } = Typography;
 

@@ -35,9 +35,9 @@ import {
   DownloadOutlined,
   BulbOutlined
 } from '@ant-design/icons';
-import { useAuth } from '../contexts/AuthContext';
-import api from '../services/api';
-import logoGestaoPsi from '../assets/newlogo-gestaopsi.png';
+import { useAuth } from '../../contexts/AuthContext';
+import api from '../../services/api';
+import logoGestaoPsi from '../../assets/newlogo-gestaopsi.png';
 
 const { Header, Sider, Content } = AntLayout;
 const { Text } = Typography;
@@ -443,10 +443,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         {/* Main Content */}
         <Content style={{
-          margin: '24px 16px',
-          padding: 24,
+          margin: '24px 24px',
+          padding: '32px',
           background: '#fff',
-          borderRadius: '8px',
+          borderRadius: '12px',
           minHeight: 'calc(100vh - 112px)',
           overflow: 'auto'
         }}>
