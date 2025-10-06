@@ -104,7 +104,6 @@ export const PERMISSIONS = {
  * Verificar se o usuário tem permissão para acessar uma rota
  */
 export const hasMenuPermission = (userType: string, menuKey: string): boolean => {
-  console.log('hasMenuPermission - userType:', userType, 'menuKey:', menuKey);
   
   // userType pode vir como número (ID) ou string (nome)
   let tipoNormalizado = userType;
@@ -115,17 +114,13 @@ export const hasMenuPermission = (userType: string, menuKey: string): boolean =>
   else if (userType === '3') tipoNormalizado = 'FUNCIONARIO';
   
   const permissions = PERMISSIONS[tipoNormalizado as keyof typeof PERMISSIONS];
-  console.log('Permissões encontradas:', !!permissions);
   
   if (!permissions) {
     console.warn('Permissões não encontradas para tipo:', tipoNormalizado);
     return false;
   }
   
-  const hasAccess = permissions.menus.includes(menuKey);
-  console.log('Acesso ao menu', menuKey, ':', hasAccess);
-  
-  return hasAccess;
+  return permissions.menus.includes(menuKey);
 };
 
 /**

@@ -41,7 +41,6 @@ const UsuariosForm: React.FC<UsuariosFormProps> = ({ usuario, onSuccess, onCance
     try {
       setLoadingData(true);
       
-      console.log('🔄 Carregando clínicas, psicólogos e tipos de usuário...');
       
       const [clinicasData, psicologosData, tiposData] = await Promise.all([
         apiService.getClinicas(),
@@ -49,9 +48,6 @@ const UsuariosForm: React.FC<UsuariosFormProps> = ({ usuario, onSuccess, onCance
         apiService.getTiposUsuario()
       ]);
       
-      console.log('✅ Clínicas recebidas:', clinicasData);
-      console.log('✅ Psicólogos recebidos:', psicologosData);
-      console.log('✅ Tipos de usuário recebidos:', tiposData);
       
       setClinicas(clinicasData);
       setPsicologos(psicologosData);
@@ -64,8 +60,7 @@ const UsuariosForm: React.FC<UsuariosFormProps> = ({ usuario, onSuccess, onCance
         message.info('Nenhum psicólogo cadastrado. Você pode criar o usuário mesmo assim (psicólogo opcional).');
       }
     } catch (error: any) {
-      console.error('❌ Erro ao carregar dados:', error);
-      console.error('Resposta do servidor:', error.response);
+      // Erro já exibido via message
       message.error(error.response?.data?.message || 'Erro ao carregar dados. Verifique se está logado e se o backend está rodando.');
     } finally {
       setLoadingData(false);
@@ -86,7 +81,7 @@ const UsuariosForm: React.FC<UsuariosFormProps> = ({ usuario, onSuccess, onCance
         status: true
       };
 
-      console.log('Enviando dados:', formData);
+      
 
       if (usuario) {
         await apiService.atualizarUsuario(usuario.id, formData);

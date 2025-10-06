@@ -29,8 +29,13 @@ class ApiService {
   private api: AxiosInstance;
 
   constructor() {
+    const appEnv = process.env.REACT_APP_ENV || 'development';
+    const baseURL = appEnv === 'production'
+      ? (process.env.REACT_APP_API_URL_PRD || process.env.REACT_APP_API_URL || 'http://localhost:8081/api')
+      : (process.env.REACT_APP_API_URL_DEV || process.env.REACT_APP_API_URL || 'http://localhost:8081/api');
+
     this.api = axios.create({
-      baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8081/api',
+      baseURL,
       headers: {
         'Content-Type': 'application/json',
       },

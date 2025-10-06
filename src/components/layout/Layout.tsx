@@ -190,11 +190,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   // Filtrar itens do menu baseado em permissões
   const menuItems = allMenuItems.filter(item => canAccessMenu(item.menuKey));
   
-  // Debug
-  console.log('Tipo de usuário:', user?.tipoUser);
-  console.log('Total de menus:', allMenuItems.length);
-  console.log('Menus permitidos:', menuItems.length);
-  console.log('Menus:', menuItems.map(m => m.menuKey));
+  // Debug removido em produção
 
   const userMenuItems = [
     {
