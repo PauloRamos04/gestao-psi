@@ -36,6 +36,7 @@ import {
   BulbOutlined
 } from '@ant-design/icons';
 import { useAuth } from '../../contexts/AuthContext';
+import { usePermissions } from '../../hooks/usePermissions';
 import api from '../../services/api';
 import logoGestaoPsi from '../../assets/newlogo-gestaopsi.png';
 
@@ -53,6 +54,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [notificacoes, setNotificacoes] = useState<{ id: number; titulo: string; conteudo: string; }[]>([]);
   const [notifLoading, setNotifLoading] = useState(false);
   const { user, logout } = useAuth();
+  const { canAccessMenu } = usePermissions();
   const location = useLocation();
 
   // Detectar mudanças no tamanho da tela
@@ -86,78 +88,113 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     carregar();
   }, []);
 
-  const menuItems = [
+  const allMenuItems = [
     {
       key: '/dashboard',
+      menuKey: 'dashboard',
       icon: <HomeOutlined />,
       label: <Link to="/dashboard">Dashboard</Link>,
     },
     {
       key: '/usuarios',
+      menuKey: 'usuarios',
       icon: <TeamOutlined />,
       label: <Link to="/usuarios">Usuários</Link>,
     },
     {
       key: '/pacientes',
+      menuKey: 'pacientes',
       icon: <UserOutlined />,
       label: <Link to="/pacientes">Pacientes</Link>,
     },
     {
       key: '/sessoes',
+      menuKey: 'sessoes',
       icon: <CalendarOutlined />,
       label: <Link to="/sessoes">Sessões</Link>,
     },
     {
       key: '/pagamentos',
+      menuKey: 'pagamentos',
       icon: <CreditCardOutlined />,
       label: <Link to="/pagamentos">Pagamentos</Link>,
     },
     {
       key: '/faturamento',
+      menuKey: 'faturamento',
       icon: <DollarOutlined />,
       label: <Link to="/faturamento">Faturamento</Link>,
     },
     {
       key: '/mensagens',
+      menuKey: 'mensagens',
       icon: <MessageOutlined />,
       label: <Link to="/mensagens">Mensagens</Link>,
     },
     {
       key: '/clinicas',
+      menuKey: 'clinicas',
       icon: <BankOutlined />,
       label: <Link to="/clinicas">Clínicas</Link>,
     },
     {
+      key: '/psicologos',
+      menuKey: 'psicologos',
+      icon: <UserOutlined />,
+      label: <Link to="/psicologos">Psicólogos</Link>,
+    },
+    {
       key: '/salas',
+      menuKey: 'salas',
       icon: <EnvironmentOutlined />,
       label: <Link to="/salas">Salas</Link>,
     },
     {
+      key: '/prontuarios',
+      menuKey: 'prontuarios',
+      icon: <FileTextOutlined />,
+      label: <Link to="/prontuarios">Prontuários</Link>,
+    },
+    {
       key: '/relatorios',
+      menuKey: 'relatorios',
       icon: <FileTextOutlined />,
       label: <Link to="/relatorios">Relatórios</Link>,
     },
     {
       key: '/historicos',
+      menuKey: 'historicos',
       icon: <HistoryOutlined />,
       label: <Link to="/historicos">Históricos</Link>,
     },
     {
       key: '/sublocacoes',
+      menuKey: 'sublocacoes',
       icon: <EnvironmentOutlined />,
       label: <Link to="/sublocacoes">Sublocações</Link>,
     },
     {
       key: '/interacoes',
+      menuKey: 'interacoes',
       icon: <BulbOutlined />,
       label: <Link to="/interacoes">Interações</Link>,
     },
     {
       key: '/downloads',
+      menuKey: 'downloads',
       icon: <DownloadOutlined />,
       label: <Link to="/downloads">Downloads</Link>,
     },
   ];
+
+  // Filtrar itens do menu baseado em permissões
+  const menuItems = allMenuItems.filter(item => canAccessMenu(item.menuKey));
+  
+  // Debug
+  console.log('Tipo de usuário:', user?.tipoUser);
+  console.log('Total de menus:', allMenuItems.length);
+  console.log('Menus permitidos:', menuItems.length);
+  console.log('Menus:', menuItems.map(m => m.menuKey));
 
   const userMenuItems = [
     {
@@ -357,10 +394,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 {!collapsed && (
                   <div style={{ marginLeft: '12px', flex: 1 }}>
                     <div style={{ fontSize: '14px', fontWeight: 500, color: '#262626' }}>
-                      {user?.titulo || 'Usuário'}
+                      {user?.tituloSite || 'Usuário'}
                     </div>
                     <div style={{ fontSize: '12px', color: '#8c8c8c' }}>
-                      {user?.clinica?.nome || 'Clínica'}
+                      {user?.clinicaNome || 'Clínica'}
                     </div>
                   </div>
                 )}

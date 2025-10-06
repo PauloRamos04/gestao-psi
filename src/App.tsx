@@ -15,6 +15,7 @@ import {
   SublocationsPage,
   InteractionsPage,
   DownloadsPage,
+  ProntuarioPage,
 } from './pages';
 
 // Feature Components
@@ -24,6 +25,7 @@ import {
   SessoesList,
   PagamentosList,
   ClinicasList,
+  PsicologosList,
   SalasList,
   MensagensList,
   IMCCalculator,
@@ -32,6 +34,9 @@ import {
   ColorChooser,
   PasswordChange,
 } from './components/features';
+
+// Import do calendário
+import AgendaCalendar from './components/features/agenda/AgendaCalendar';
 
 
 const App: React.FC = () => {
@@ -118,6 +123,15 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <ClinicasList />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route 
+            path="/psicologos" 
+            element={
+              <ProtectedRoute>
+                <PsicologosList />
               </ProtectedRoute>
             } 
           />
@@ -221,6 +235,26 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <DownloadsPage />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* Agenda/Calendário */}
+          <Route 
+            path="/agenda" 
+            element={
+              <ProtectedRoute>
+                <AgendaCalendar />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* Prontuários */}
+          <Route 
+            path="/prontuarios" 
+            element={
+              <ProtectedRoute>
+                <ProntuarioPage />
               </ProtectedRoute>
             } 
           />

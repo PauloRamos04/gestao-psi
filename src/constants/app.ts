@@ -8,7 +8,7 @@ export const APP_DESCRIPTION = 'Sistema de Gestão para Clínicas de Psicologia'
 export const APP_VERSION = '1.0.0';
 
 // Configurações de API
-export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081/api';
 export const API_TIMEOUT = 30000; // 30 segundos
 
 // Configurações de autenticação

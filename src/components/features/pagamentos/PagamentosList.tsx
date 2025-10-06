@@ -31,6 +31,7 @@ import {
 import { useAuth } from '../../../contexts/AuthContext';
 import apiService from '../../../services/api';
 import { Pagamento, Paciente, TipoPagamento, FiltroPeriodo } from '../../../types';
+import PagamentosForm from './PagamentosForm';
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
@@ -41,7 +42,6 @@ const PagamentosList: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingPagamento, setEditingPagamento] = useState<Pagamento | null>(null);
-  const [form] = Form.useForm();
   const [searchText, setSearchText] = useState('');
   const [dateRange, setDateRange] = useState<[string, string] | null>(null);
 
@@ -77,24 +77,17 @@ const PagamentosList: React.FC = () => {
 
   const handleAdd = () => {
     setEditingPagamento(null);
-    form.resetFields();
     setModalVisible(true);
   };
 
   const handleEdit = (pagamento: Pagamento) => {
     setEditingPagamento(pagamento);
-    form.setFieldsValue({
-      pacienteId: pagamento.pacienteId,
-      valor: pagamento.valor,
-      data: pagamento.data,
-      tipoPagamentoId: pagamento.tipoPagamentoId
-    });
     setModalVisible(true);
   };
 
   const handleDelete = async (id: number) => {
     try {
-      // Aqui você implementaria a chamada para deletar
+      await apiService.deletarPagamento(id);
       message.success('Pagamento removido com sucesso');
       loadPagamentos();
     } catch (error) {
@@ -102,37 +95,12 @@ const PagamentosList: React.FC = () => {
     }
   };
 
-  const handleModalOk = async () => {
-    try {
-      const values = await form.validateFields();
-      
-      if (editingPagamento) {
-        // Atualizar pagamento existente
-        message.success('Pagamento atualizado com sucesso');
-      } else {
-        // Criar novo pagamento
-        message.success('Pagamento criado com sucesso');
-      }
-      
-      setModalVisible(false);
-      loadPagamentos();
-    } catch (error) {
-      message.error('Erro ao salvar pagamento');
-    }
-  };
-
-  const handleModalCancel = () => {
-    setModalVisible(false);
-    setEditingPagamento(null);
-    form.resetFields();
-  };
-
   const handleDateRangeChange = (dates: any, dateStrings: [string, string]) => {
     setDateRange(dateStrings);
   };
 
   const filteredPagamentos = pagamentos.filter(pagamento => {
-    const matchesSearch = pagamento.paciente?.nome?.toLowerCase().includes(searchText.toLowerCase());
+    const matchesSearch = pagamento.pacienteNome?.toLowerCase().includes(searchText.toLowerCase());
     return matchesSearch;
   });
 
@@ -336,63 +304,28 @@ const PagamentosList: React.FC = () => {
       <Modal
         title={editingPagamento ? 'Editar Pagamento' : 'Novo Pagamento'}
         open={modalVisible}
-        onOk={handleModalOk}
-        onCancel={handleModalCancel}
+        onCancel={() => {
+          setModalVisible(false);
+          setEditingPagamento(null);
+        }}
+        footer={null}
         width={600}
+        destroyOnClose={true}
       >
-        <Form
-          form={form}
-          layout="vertical"
-        >
-          <Form.Item
-            name="pacienteId"
-            label="Paciente"
-            rules={[{ required: true, message: 'Por favor, selecione o paciente' }]}
-          >
-            <Select placeholder="Selecione o paciente">
-              {/* Aqui você carregaria a lista de pacientes */}
-              <Option value={1}>Paciente Exemplo</Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item
-            name="valor"
-            label="Valor"
-            rules={[
-              { required: true, message: 'Por favor, insira o valor' },
-              { type: 'number', min: 0.01, message: 'Valor deve ser maior que zero' }
-            ]}
-          >
-            <InputNumber
-              placeholder="0,00"
-              formatter={(value) => `R$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-              parser={(value) => value!.replace(/R\$\s?|(,*)/g, '')}
-              style={{ width: '100%' }}
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="data"
-            label="Data do Pagamento"
-            rules={[{ required: true, message: 'Por favor, selecione a data' }]}
-          >
-            <DatePicker style={{ width: '100%' }} />
-          </Form.Item>
-
-          <Form.Item
-            name="tipoPagamentoId"
-            label="Tipo de Pagamento"
-            rules={[{ required: true, message: 'Por favor, selecione o tipo de pagamento' }]}
-          >
-            <Select placeholder="Selecione o tipo de pagamento">
-              <Option value={1}>Dinheiro</Option>
-              <Option value={2}>Cartão de Débito</Option>
-              <Option value={3}>Cartão de Crédito</Option>
-              <Option value={4}>PIX</Option>
-              <Option value={5}>Transferência</Option>
-            </Select>
-          </Form.Item>
-        </Form>
+        {modalVisible && (
+          <PagamentosForm
+            pagamento={editingPagamento || undefined}
+            onSuccess={() => {
+              setModalVisible(false);
+              setEditingPagamento(null);
+              loadPagamentos();
+            }}
+            onCancel={() => {
+              setModalVisible(false);
+              setEditingPagamento(null);
+            }}
+          />
+        )}
       </Modal>
     </div>
   );

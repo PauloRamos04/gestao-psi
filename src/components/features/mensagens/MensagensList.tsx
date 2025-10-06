@@ -32,19 +32,21 @@ import {
 import { useAuth } from '../../../contexts/AuthContext';
 import apiService from '../../../services/api';
 import { Mensagem } from '../../../types';
+import MensagensForm from './MensagensForm';
+import { usePermissions } from '../../../hooks/usePermissions';
 
 const { Option } = Select;
 const { TextArea } = Input;
 
 const MensagensList: React.FC = () => {
   const { user } = useAuth();
+  const { canDoAction, isAdmin } = usePermissions();
   const [mensagens, setMensagens] = useState<Mensagem[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [editingMensagem, setEditingMensagem] = useState<Mensagem | null>(null);
   const [selectedMensagem, setSelectedMensagem] = useState<Mensagem | null>(null);
-  const [form] = Form.useForm();
   const [searchText, setSearchText] = useState('');
 
   // Estatísticas
@@ -70,17 +72,11 @@ const MensagensList: React.FC = () => {
 
   const handleAdd = () => {
     setEditingMensagem(null);
-    form.resetFields();
     setModalVisible(true);
   };
 
   const handleEdit = (mensagem: Mensagem) => {
     setEditingMensagem(mensagem);
-    form.setFieldsValue({
-      titulo: mensagem.titulo,
-      conteudo: mensagem.conteudo,
-      status: mensagem.status
-    });
     setModalVisible(true);
   };
 
@@ -91,7 +87,7 @@ const MensagensList: React.FC = () => {
 
   const handleDelete = async (id: number) => {
     try {
-      // Aqui você implementaria a chamada para deletar
+      await apiService.deletarMensagem(id);
       message.success('Mensagem removida com sucesso');
       loadMensagens();
     } catch (error) {
@@ -99,30 +95,6 @@ const MensagensList: React.FC = () => {
     }
   };
 
-  const handleModalOk = async () => {
-    try {
-      const values = await form.validateFields();
-      
-      if (editingMensagem) {
-        // Atualizar mensagem existente
-        message.success('Mensagem atualizada com sucesso');
-      } else {
-        // Criar nova mensagem
-        message.success('Mensagem criada com sucesso');
-      }
-      
-      setModalVisible(false);
-      loadMensagens();
-    } catch (error) {
-      message.error('Erro ao salvar mensagem');
-    }
-  };
-
-  const handleModalCancel = () => {
-    setModalVisible(false);
-    setEditingMensagem(null);
-    form.resetFields();
-  };
 
   const handleViewModalCancel = () => {
     setViewModalVisible(false);
@@ -151,15 +123,22 @@ const MensagensList: React.FC = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Mensagens</h1>
-          <p className="text-gray-600">Gerencie as mensagens do sistema</p>
+          <p className="text-gray-600">
+            {canDoAction('mensagens', 'criar') 
+              ? 'Gerencie as mensagens do sistema' 
+              : 'Visualize as mensagens do sistema'
+            }
+          </p>
         </div>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={handleAdd}
-        >
-          Nova Mensagem
-        </Button>
+        {canDoAction('mensagens', 'criar') && (
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={handleAdd}
+          >
+            Nova Mensagem
+          </Button>
+        )}
       </div>
 
       {/* Estatísticas */}
@@ -244,29 +223,33 @@ const MensagensList: React.FC = () => {
                     onClick={() => handleView(mensagem)}
                   />
                 </Tooltip>,
-                <Tooltip title="Editar">
-                  <Button
-                    type="text"
-                    icon={<EditOutlined />}
-                    size="small"
-                    onClick={() => handleEdit(mensagem)}
-                  />
-                </Tooltip>,
-                <Popconfirm
-                  title="Tem certeza que deseja remover esta mensagem?"
-                  onConfirm={() => handleDelete(mensagem.id)}
-                  okText="Sim"
-                  cancelText="Não"
-                >
-                  <Tooltip title="Remover">
+                ...(canDoAction('mensagens', 'editar') ? [
+                  <Tooltip title="Editar">
                     <Button
                       type="text"
-                      danger
-                      icon={<DeleteOutlined />}
+                      icon={<EditOutlined />}
                       size="small"
+                      onClick={() => handleEdit(mensagem)}
                     />
                   </Tooltip>
-                </Popconfirm>
+                ] : []),
+                ...(canDoAction('mensagens', 'deletar') ? [
+                  <Popconfirm
+                    title="Tem certeza que deseja remover esta mensagem?"
+                    onConfirm={() => handleDelete(mensagem.id)}
+                    okText="Sim"
+                    cancelText="Não"
+                  >
+                    <Tooltip title="Remover">
+                      <Button
+                        type="text"
+                        danger
+                        icon={<DeleteOutlined />}
+                        size="small"
+                      />
+                    </Tooltip>
+                  </Popconfirm>
+                ] : [])
               ]}
             >
               <List.Item.Meta
@@ -308,60 +291,35 @@ const MensagensList: React.FC = () => {
         />
       </Card>
 
-      {/* Modal de Adicionar/Editar */}
-      <Modal
-        title={editingMensagem ? 'Editar Mensagem' : 'Nova Mensagem'}
-        open={modalVisible}
-        onOk={handleModalOk}
-        onCancel={handleModalCancel}
-        width={600}
-      >
-        <Form
-          form={form}
-          layout="vertical"
-          initialValues={{
-            status: true
+      {/* Modal de Adicionar/Editar - Apenas para Admins */}
+      {canDoAction('mensagens', 'criar') && (
+        <Modal
+          title={editingMensagem ? 'Editar Mensagem' : 'Nova Mensagem'}
+          open={modalVisible}
+          onCancel={() => {
+            setModalVisible(false);
+            setEditingMensagem(null);
           }}
+          footer={null}
+          width={600}
+          destroyOnClose={true}
         >
-          <Form.Item
-            name="titulo"
-            label="Título"
-            rules={[
-              { required: true, message: 'Por favor, insira o título da mensagem' },
-              { min: 3, message: 'Título deve ter pelo menos 3 caracteres' }
-            ]}
-          >
-            <Input placeholder="Digite o título da mensagem" />
-          </Form.Item>
-
-          <Form.Item
-            name="conteudo"
-            label="Conteúdo"
-            rules={[
-              { required: true, message: 'Por favor, insira o conteúdo da mensagem' },
-              { min: 10, message: 'Conteúdo deve ter pelo menos 10 caracteres' }
-            ]}
-          >
-            <TextArea
-              rows={6}
-              placeholder="Digite o conteúdo da mensagem"
-              showCount
-              maxLength={1000}
+          {modalVisible && (
+            <MensagensForm
+              mensagem={editingMensagem || undefined}
+              onSuccess={() => {
+                setModalVisible(false);
+                setEditingMensagem(null);
+                loadMensagens();
+              }}
+              onCancel={() => {
+                setModalVisible(false);
+                setEditingMensagem(null);
+              }}
             />
-          </Form.Item>
-
-          <Form.Item
-            name="status"
-            label="Status"
-            rules={[{ required: true, message: 'Por favor, selecione o status' }]}
-          >
-            <Select placeholder="Selecione o status">
-              <Option value={true}>Ativa</Option>
-              <Option value={false}>Inativa</Option>
-            </Select>
-          </Form.Item>
-        </Form>
-      </Modal>
+          )}
+        </Modal>
+      )}
 
       {/* Modal de Visualização */}
       <Modal

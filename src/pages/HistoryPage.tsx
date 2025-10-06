@@ -74,96 +74,13 @@ const HistoryPage: React.FC = () => {
   const loadHistoryData = async () => {
     setLoading(true);
     try {
-      // Simular carregamento de dados
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // TODO: Implementar endpoint para buscar histórico
+      // const history = await apiService.getHistory(selectedPeriod, dateRange);
+      // setHistoryData(history.data);
+      // setRoomUsage(history.roomUsage);
       
-      // Dados mockados para demonstração
-      const mockHistoryData: HistoryData[] = [
-        {
-          period: 'Janeiro 2024',
-          sessions: 45,
-          revenue: 6750,
-          patients: 12,
-          rooms: 3,
-          trend: 'up',
-          percentage: 15
-        },
-        {
-          period: 'Fevereiro 2024',
-          sessions: 52,
-          revenue: 7800,
-          patients: 14,
-          rooms: 3,
-          trend: 'up',
-          percentage: 12
-        },
-        {
-          period: 'Março 2024',
-          sessions: 48,
-          revenue: 7200,
-          patients: 13,
-          rooms: 3,
-          trend: 'down',
-          percentage: -8
-        },
-        {
-          period: 'Abril 2024',
-          sessions: 55,
-          revenue: 8250,
-          patients: 15,
-          rooms: 3,
-          trend: 'up',
-          percentage: 18
-        },
-        {
-          period: 'Maio 2024',
-          sessions: 58,
-          revenue: 8700,
-          patients: 16,
-          rooms: 3,
-          trend: 'up',
-          percentage: 8
-        },
-        {
-          period: 'Junho 2024',
-          sessions: 62,
-          revenue: 9300,
-          patients: 17,
-          rooms: 3,
-          trend: 'up',
-          percentage: 12
-        }
-      ];
-
-      const mockRoomUsage: RoomUsage[] = [
-        {
-          roomName: 'Sala 1 - Individual',
-          usageCount: 45,
-          totalHours: 37.5,
-          percentage: 35
-        },
-        {
-          roomName: 'Sala 2 - Casal',
-          usageCount: 28,
-          totalHours: 23.3,
-          percentage: 25
-        },
-        {
-          roomName: 'Sala 3 - Grupo',
-          usageCount: 15,
-          totalHours: 22.5,
-          percentage: 20
-        },
-        {
-          roomName: 'Sala 4 - Supervisão',
-          usageCount: 12,
-          totalHours: 24,
-          percentage: 20
-        }
-      ];
-
-      setHistoryData(mockHistoryData);
-      setRoomUsage(mockRoomUsage);
+      setHistoryData([]);
+      setRoomUsage([]);
       message.success('Dados históricos carregados com sucesso!');
     } catch (error) {
       message.error('Erro ao carregar dados históricos');

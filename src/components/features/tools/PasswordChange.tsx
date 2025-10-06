@@ -168,13 +168,13 @@ const PasswordChange: React.FC = () => {
               <Card title="Informações da Conta" size="small" style={{ marginBottom: '24px' }}>
                 <Space direction="vertical" size="small">
                   <div>
-                    <Text strong>Usuário:</Text> {user?.titulo || 'Usuário'}
+                    <Text strong>Usuário:</Text> {user?.tituloSite || 'Usuário'}
                   </div>
                   <div>
-                    <Text strong>Clínica:</Text> {user?.clinica?.nome || 'Clínica'}
+                    <Text strong>Clínica:</Text> {user?.clinicaNome || 'Clínica'}
                   </div>
                   <div>
-                    <Text strong>Psicólogo:</Text> {user?.psicologo?.nome || 'Psicólogo'}
+                    <Text strong>Psicólogo:</Text> {user?.psicologoNome || 'Psicólogo'}
                   </div>
                 </Space>
               </Card>

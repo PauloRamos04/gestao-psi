@@ -210,12 +210,13 @@ const Login: React.FC = () => {
 
                 <Form.Item
                   name="username"
-                  label={<Text strong style={{ color: '#374151' }}>Usuário</Text>}
-                  rules={[{ required: true, message: 'Por favor, insira seu usuário!' }]}
+                  label={<Text strong style={{ color: '#374151' }}>Username</Text>}
+                  rules={[{ required: true, message: 'Por favor, insira seu username!' }]}
                 >
                   <Input
                     prefix={<UserOutlined style={{ color: '#9ca3af' }} />}
-                    placeholder="Digite seu usuário"
+                    placeholder="Digite seu username"
+                    autoComplete="username"
                   />
                 </Form.Item>
 

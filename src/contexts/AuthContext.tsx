@@ -1,9 +1,20 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Usuario, LoginRequest } from '../types';
+import { LoginRequest, LoginResponse } from '../types';
 import apiService from '../services/api';
 
+interface UserInfo {
+  userId: number;
+  username: string;
+  clinicaId: number;
+  psicologId: number;
+  tipoUser: string;
+  clinicaNome: string;
+  psicologoNome: string;
+  tituloSite: string;
+}
+
 interface AuthContextType {
-  user: Usuario | null;
+  user: UserInfo | null;
   token: string | null;
   login: (credentials: LoginRequest) => Promise<void>;
   logout: () => void;
@@ -18,7 +29,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<Usuario | null>(null);
+  const [user, setUser] = useState<UserInfo | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -35,14 +46,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (credentials: LoginRequest): Promise<void> => {
     try {
-      const response = await apiService.login(credentials);
-      const { token: newToken, user: newUser } = response;
+      const response: LoginResponse = await apiService.login(credentials);
+      const { token: newToken, userId, username, clinicaId, psicologId, tipoUser, clinicaNome, psicologoNome, tituloSite } = response;
+
+      const userInfo: UserInfo = {
+        userId,
+        username,
+        clinicaId,
+        psicologId,
+        tipoUser,
+        clinicaNome,
+        psicologoNome,
+        tituloSite
+      };
 
       setToken(newToken);
-      setUser(newUser);
+      setUser(userInfo);
 
       localStorage.setItem('token', newToken);
-      localStorage.setItem('user', JSON.stringify(newUser));
+      localStorage.setItem('user', JSON.stringify(userInfo));
     } catch (error) {
       throw error;
     }

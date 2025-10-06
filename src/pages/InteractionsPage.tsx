@@ -94,72 +94,12 @@ const InteractionsPage: React.FC = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      // Simular carregamento de dados
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // TODO: Implementar endpoints para sugestões e recomendações
+      // const suggestionsData = await apiService.getSuggestions();
+      // const recommendationsData = await apiService.getRecommendations();
       
-      // Dados mockados para demonstração
-      const mockSuggestions: Suggestion[] = [
-        {
-          id: 1,
-          title: 'Adicionar notificações push',
-          content: 'Seria muito útil ter notificações push para lembretes de sessões e pagamentos pendentes.',
-          type: 'feature',
-          status: 'pending',
-          priority: 'high',
-          author: 'Dr. João Silva',
-          date: '2024-01-15'
-        },
-        {
-          id: 2,
-          title: 'Melhorar interface do calendário',
-          content: 'O calendário poderia ter uma visualização semanal mais clara e intuitiva.',
-          type: 'improvement',
-          status: 'in_progress',
-          priority: 'medium',
-          author: 'Dra. Maria Santos',
-          date: '2024-01-10',
-          response: 'Obrigado pela sugestão! Estamos trabalhando nessa melhoria.',
-          responseDate: '2024-01-12'
-        },
-        {
-          id: 3,
-          title: 'Erro ao salvar relatórios',
-          content: 'Quando tento gerar um relatório em PDF, o sistema apresenta erro.',
-          type: 'bug',
-          status: 'completed',
-          priority: 'high',
-          author: 'Dr. Pedro Costa',
-          date: '2024-01-08',
-          response: 'Bug corrigido na versão 2.1.3. Obrigado pelo reporte!',
-          responseDate: '2024-01-14'
-        }
-      ];
-
-      const mockRecommendations: Recommendation[] = [
-        {
-          id: 1,
-          name: 'Dr. Carlos Mendes',
-          profession: 'Psicólogo Clínico',
-          contact: 'carlos.mendes@email.com',
-          location: 'São Paulo, SP',
-          description: 'Especialista em terapia cognitivo-comportamental com 10 anos de experiência.',
-          status: 'pending',
-          date: '2024-01-20'
-        },
-        {
-          id: 2,
-          name: 'Dra. Ana Beatriz',
-          profession: 'Psicóloga Organizacional',
-          contact: '(11) 99999-9999',
-          location: 'Rio de Janeiro, RJ',
-          description: 'Experiência em RH e desenvolvimento organizacional.',
-          status: 'contacted',
-          date: '2024-01-18'
-        }
-      ];
-
-      setSuggestions(mockSuggestions);
-      setRecommendations(mockRecommendations);
+      setSuggestions([]);
+      setRecommendations([]);
     } catch (error) {
       message.error('Erro ao carregar dados');
     } finally {
@@ -179,7 +119,7 @@ const InteractionsPage: React.FC = () => {
         id: Math.max(...suggestions.map(s => s.id)) + 1,
         ...values,
         status: 'pending',
-        author: user?.titulo || 'Usuário',
+        author: user?.tituloSite || 'Usuário',
         date: format(new Date(), 'yyyy-MM-dd')
       };
       

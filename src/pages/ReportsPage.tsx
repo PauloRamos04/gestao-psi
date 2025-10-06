@@ -91,53 +91,102 @@ const ReportsPage: React.FC = () => {
   ];
 
   const loadReportData = async () => {
-    if (!dateRange) {
+    if (!user?.clinicaId || !user?.psicologId) {
+      message.error('Usuário não autenticado');
+      return;
+    }
+
+    if (selectedReport !== 'patients' && !dateRange) {
       message.warning('Selecione um período para gerar o relatório');
       return;
     }
 
     setLoading(true);
     try {
-      // Simular carregamento de dados
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const [inicio, fim] = dateRange || ['', ''];
       
-      // Aqui seria feita a chamada real para o backend
-      // const data = await apiService.getReport(selectedReport, dateRange[0], dateRange[1]);
-      
-      // Dados mockados para demonstração
-      const mockData: ReportData = {
-        id: selectedReport,
-        title: reportTypes.find(r => r.key === selectedReport)?.title || '',
-        description: reportTypes.find(r => r.key === selectedReport)?.description || '',
-        type: selectedReport as any,
-        data: generateMockData(selectedReport),
-        summary: {
-          total: 45,
-          paid: 38,
-          pending: 5,
-          cancelled: 2
-        }
-      };
-      
-      setReportData(mockData);
-      message.success('Relatório gerado com sucesso!');
-    } catch (error) {
-      message.error('Erro ao gerar relatório');
+      if (selectedReport === 'sessions') {
+        const data = await apiService.getRelatorioSessoes(user.clinicaId, user.psicologId, inicio, fim);
+        setReportData({
+          id: 'sessions',
+          title: 'Relatório de Sessões',
+          description: `Período: ${inicio} a ${fim}`,
+          type: 'sessions',
+          data: [],
+          summary: {
+            total: data.totalSessoes,
+            paid: data.sessoesConfirmadas,
+            pending: data.sessoesPendentes,
+            cancelled: 0
+          }
+        });
+        message.success('Relatório gerado com sucesso!');
+      } else if (selectedReport === 'patients') {
+        const data = await apiService.getRelatorioPacientes(user.clinicaId, user.psicologId);
+        setReportData({
+          id: 'patients',
+          title: 'Relatório de Pacientes',
+          description: 'Todos os pacientes',
+          type: 'patients',
+          data: [],
+          summary: {
+            total: data.totalPacientes,
+            paid: data.pacientesAtivos,
+            pending: data.pacientesInativos,
+            cancelled: 0
+          }
+        });
+        message.success('Relatório gerado com sucesso!');
+      } else if (selectedReport === 'financial') {
+        const data = await apiService.getRelatorioFinanceiro(user.clinicaId, user.psicologId, inicio, fim);
+        setReportData({
+          id: 'financial',
+          title: 'Relatório Financeiro',
+          description: `Período: ${inicio} a ${fim}`,
+          type: 'financial',
+          data: Object.entries(data.porTipoPagamento).map(([tipo, valor]) => ({ tipo, valor })),
+          summary: {
+            total: data.totalRecebido,
+            paid: data.quantidadePagamentos,
+            pending: 0,
+            cancelled: 0
+          }
+        });
+        message.success('Relatório gerado com sucesso!');
+      } else if (selectedReport === 'general') {
+        // Relatório geral combina todos os dados
+        const [sessoes, pacientes, financeiro] = await Promise.all([
+          apiService.getRelatorioSessoes(user.clinicaId, user.psicologId, inicio, fim),
+          apiService.getRelatorioPacientes(user.clinicaId, user.psicologId),
+          apiService.getRelatorioFinanceiro(user.clinicaId, user.psicologId, inicio, fim)
+        ]);
+        
+        setReportData({
+          id: 'general',
+          title: 'Relatório Geral',
+          description: `Período: ${inicio} a ${fim}`,
+          type: 'general',
+          data: [
+            { label: 'Total de Sessões', value: sessoes.totalSessoes },
+            { label: 'Total de Pacientes', value: pacientes.totalPacientes },
+            { label: 'Total Recebido', value: `R$ ${financeiro.totalRecebido.toFixed(2)}` },
+            { label: 'Ticket Médio', value: `R$ ${financeiro.ticketMedio.toFixed(2)}` }
+          ],
+          summary: {
+            total: sessoes.totalSessoes,
+            paid: pacientes.pacientesAtivos,
+            pending: sessoes.sessoesPendentes,
+            cancelled: pacientes.pacientesInativos
+          }
+        });
+        message.success('Relatório geral gerado com sucesso!');
+      }
+    } catch (error: any) {
+      console.error('Erro ao gerar relatório:', error);
+      message.error(error.response?.data?.message || 'Erro ao gerar relatório');
     } finally {
       setLoading(false);
     }
-  };
-
-  const generateMockData = (type: string) => {
-    const baseData = [
-      { id: 1, name: 'Ana Silva', date: '2024-01-15', value: 150, status: 'paid' },
-      { id: 2, name: 'Bruno Santos', date: '2024-01-16', value: 150, status: 'pending' },
-      { id: 3, name: 'Carla Oliveira', date: '2024-01-17', value: 150, status: 'paid' },
-      { id: 4, name: 'Diego Costa', date: '2024-01-18', value: 150, status: 'cancelled' },
-      { id: 5, name: 'Elena Ferreira', date: '2024-01-19', value: 150, status: 'paid' }
-    ];
-
-    return baseData;
   };
 
   const exportReport = (format: 'pdf' | 'excel') => {
@@ -146,8 +195,104 @@ const ReportsPage: React.FC = () => {
       return;
     }
 
-    message.success(`Relatório exportado em formato ${format.toUpperCase()}`);
-    // Aqui seria implementada a lógica de exportação
+    if (format === 'excel') {
+      exportToExcel();
+    } else if (format === 'pdf') {
+      exportToPDF();
+    }
+  };
+
+  const exportToExcel = () => {
+    // Criar CSV (compatível com Excel)
+    const headers = columns.map(col => col.title).join(',');
+    const rows = reportData!.data.map(row => {
+      return columns.map(col => {
+        const value = row[col.dataIndex];
+        return typeof value === 'string' ? `"${value}"` : value || '';
+      }).join(',');
+    });
+    
+    const csv = [headers, ...rows].join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `relatorio_${reportData!.type}_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    
+    message.success('Relatório exportado para Excel (CSV)!');
+  };
+
+  const exportToPDF = () => {
+    // Simples: abrir janela de impressão (usuário pode salvar como PDF)
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${reportData!.title}</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          h1 { color: #1890ff; }
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+          th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+          th { background-color: #1890ff; color: white; }
+          .stats { display: flex; justify-content: space-around; margin: 20px 0; }
+          .stat { text-align: center; padding: 15px; background: #f0f0f0; border-radius: 8px; }
+          .stat-value { font-size: 24px; font-weight: bold; color: #1890ff; }
+          .stat-label { font-size: 14px; color: #666; }
+        </style>
+      </head>
+      <body>
+        <h1>${reportData!.title}</h1>
+        <p>${reportData!.description}</p>
+        
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-value">${reportData!.summary.total}</div>
+            <div class="stat-label">Total</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">${reportData!.summary.paid}</div>
+            <div class="stat-label">Confirmadas</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">${reportData!.summary.pending}</div>
+            <div class="stat-label">Pendentes</div>
+          </div>
+        </div>
+        
+        <table>
+          <thead>
+            <tr>
+              ${columns.map(col => `<th>${col.title}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${reportData!.data.map(row => `
+              <tr>
+                ${columns.map(col => `<td>${row[col.dataIndex] || ''}</td>`).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        
+        <p style="margin-top: 30px; text-align: center; color: #666;">
+          Gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}
+        </p>
+      </body>
+      </html>
+    `;
+    
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      setTimeout(() => {
+        printWindow.print();
+      }, 250);
+      message.success('Janela de impressão aberta! Salve como PDF.');
+    } else {
+      message.error('Bloqueador de pop-ups ativado. Permita pop-ups para exportar PDF.');
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -168,41 +313,57 @@ const ReportsPage: React.FC = () => {
     }
   };
 
-  const columns = [
-    {
-      title: 'ID',
-      dataIndex: 'id',
-      key: 'id',
-      width: 80,
-    },
-    {
-      title: 'Nome',
-      dataIndex: 'name',
-      key: 'name',
-    },
-    {
-      title: 'Data',
-      dataIndex: 'date',
-      key: 'date',
-      render: (date: string) => format(new Date(date), 'dd/MM/yyyy', { locale: ptBR }),
-    },
-    {
-      title: 'Valor',
-      dataIndex: 'value',
-      key: 'value',
-      render: (value: number) => `R$ ${value.toFixed(2)}`,
-    },
-    {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: string) => (
-        <Tag color={getStatusColor(status)}>
-          {getStatusText(status)}
-        </Tag>
-      ),
-    },
-  ];
+  // Colunas dinâmicas baseadas no tipo de relatório
+  const getColumns = () => {
+    if (!reportData) return [];
+    
+    if (reportData.type === 'general') {
+      return [
+        {
+          title: 'Indicador',
+          dataIndex: 'label',
+          key: 'label',
+        },
+        {
+          title: 'Valor',
+          dataIndex: 'value',
+          key: 'value',
+          render: (value: any) => typeof value === 'number' ? value.toLocaleString('pt-BR') : value
+        }
+      ];
+    }
+    
+    if (reportData.type === 'financial') {
+      return [
+        {
+          title: 'Tipo de Pagamento',
+          dataIndex: 'tipo',
+          key: 'tipo',
+        },
+        {
+          title: 'Valor Total',
+          dataIndex: 'valor',
+          key: 'valor',
+          render: (valor: number) => `R$ ${valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+        }
+      ];
+    }
+    
+    return [
+      {
+        title: 'Descrição',
+        dataIndex: 'description',
+        key: 'description',
+      },
+      {
+        title: 'Informação',
+        dataIndex: 'info',
+        key: 'info',
+      }
+    ];
+  };
+
+  const columns = getColumns();
 
   return (
     <div style={{ padding: '24px' }}>
@@ -355,19 +516,21 @@ const ReportsPage: React.FC = () => {
                 </Row>
 
                 {/* Tabela de Dados */}
-                <Table
-                  columns={columns}
-                  dataSource={reportData.data}
-                  rowKey="id"
-                  pagination={{
-                    pageSize: 10,
-                    showSizeChanger: true,
-                    showQuickJumper: true,
-                    showTotal: (total, range) =>
-                      `${range[0]}-${range[1]} de ${total} itens`,
-                  }}
-                  scroll={{ x: 600 }}
-                />
+                {reportData.data && reportData.data.length > 0 && (
+                  <Table
+                    columns={columns}
+                    dataSource={reportData.data}
+                    rowKey={(record, index) => record.id || record.label || record.tipo || `row-${index}`}
+                    pagination={{
+                      pageSize: 10,
+                      showSizeChanger: true,
+                      showQuickJumper: true,
+                      showTotal: (total, range) =>
+                        `${range[0]}-${range[1]} de ${total} itens`,
+                    }}
+                    scroll={{ x: 600 }}
+                  />
+                )}
               </Space>
             </Card>
           ) : (

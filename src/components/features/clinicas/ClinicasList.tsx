@@ -24,17 +24,14 @@ import {
   BankOutlined,
   SearchOutlined,
   ReloadOutlined,
-  EyeOutlined,
-  UserOutlined
+  EyeOutlined
 } from '@ant-design/icons';
-import { useAuth } from '../../../contexts/AuthContext';
 import apiService from '../../../services/api';
 import { Clinica } from '../../../types';
 
 const { Option } = Select;
 
 const ClinicasList: React.FC = () => {
-  const { user } = useAuth();
   const [clinicas, setClinicas] = useState<Clinica[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
@@ -55,32 +52,11 @@ const ClinicasList: React.FC = () => {
   const loadClinicas = async () => {
     setLoading(true);
     try {
-      // Como não temos um endpoint específico para listar clínicas,
-      // vamos simular com dados mockados
-      const mockClinicas: Clinica[] = [
-        {
-          id: 1,
-          clinicaLogin: 'clinica1',
-          nome: 'Clínica Psicológica Central',
-          status: true,
-          titulo: 'Clínica Central'
-        },
-        {
-          id: 2,
-          clinicaLogin: 'clinica2',
-          nome: 'Centro de Psicologia Avançada',
-          status: true,
-          titulo: 'Centro Avançado'
-        },
-        {
-          id: 3,
-          clinicaLogin: 'clinica3',
-          nome: 'Instituto de Saúde Mental',
-          status: false,
-          titulo: 'Instituto Saúde'
-        }
-      ];
-      setClinicas(mockClinicas);
+      const data = await apiService.getClinicas();
+      setClinicas(data);
+      if (data.length === 0) {
+        message.info('Nenhuma clínica cadastrada ainda');
+      }
     } catch (error) {
       message.error('Erro ao carregar clínicas');
     } finally {
@@ -107,11 +83,11 @@ const ClinicasList: React.FC = () => {
 
   const handleDelete = async (id: number) => {
     try {
-      // Aqui você implementaria a chamada para deletar
-      message.success('Clínica removida com sucesso');
+      await apiService.desativarClinica(id);
+      message.success('Clínica desativada com sucesso');
       loadClinicas();
     } catch (error) {
-      message.error('Erro ao remover clínica');
+      message.error('Erro ao desativar clínica');
     }
   };
 
@@ -121,16 +97,18 @@ const ClinicasList: React.FC = () => {
       
       if (editingClinica) {
         // Atualizar clínica existente
+        await apiService.atualizarClinica(editingClinica.id, values);
         message.success('Clínica atualizada com sucesso');
       } else {
         // Criar nova clínica
+        await apiService.criarClinica(values);
         message.success('Clínica criada com sucesso');
       }
       
       setModalVisible(false);
       loadClinicas();
-    } catch (error) {
-      message.error('Erro ao salvar clínica');
+    } catch (error: any) {
+      message.error(error.response?.data?.message || 'Erro ao salvar clínica');
     }
   };
 

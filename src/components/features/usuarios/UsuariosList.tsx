@@ -15,6 +15,7 @@ import {
   Statistic,
   Switch,
   Tooltip,
+  Modal,
   message
 } from 'antd';
 import {
@@ -23,10 +24,13 @@ import {
   TeamOutlined,
   CheckCircleOutlined,
   ExclamationCircleOutlined,
-  ReloadOutlined
+  ReloadOutlined,
+  PlusOutlined,
+  EditOutlined
 } from '@ant-design/icons';
 import { Usuario } from '../../../types';
 import apiService from '../../../services/api';
+import UsuariosForm from './UsuariosForm';
 
 const { Title, Text } = Typography;
 
@@ -35,6 +39,8 @@ const UsuariosList: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editingUsuario, setEditingUsuario] = useState<Usuario | null>(null);
 
   useEffect(() => {
     loadUsuarios();
@@ -69,8 +75,8 @@ const UsuariosList: React.FC = () => {
 
   const filteredUsuarios = usuarios.filter(usuario =>
     usuario.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    usuario.clinica?.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    usuario.psicologo?.nome.toLowerCase().includes(searchTerm.toLowerCase())
+    usuario.clinicaNome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    usuario.psicologoNome?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const activeUsers = usuarios.filter(u => u.status).length;
@@ -98,26 +104,26 @@ const UsuariosList: React.FC = () => {
     },
     {
       title: 'Clínica',
-      dataIndex: ['clinica', 'nome'],
+      dataIndex: 'clinicaNome',
       key: 'clinica',
       render: (text: string, record: Usuario) => (
         <div>
           <div>{text || 'N/A'}</div>
           <Text type="secondary" style={{ fontSize: '12px' }}>
-            {record.clinica?.clinicaLogin || ''}
+            ID: {record.clinicaId || 'N/A'}
           </Text>
         </div>
       ),
     },
     {
       title: 'Psicólogo',
-      dataIndex: ['psicologo', 'nome'],
+      dataIndex: 'psicologoNome',
       key: 'psicologo',
       render: (text: string, record: Usuario) => (
         <div>
           <div>{text || 'N/A'}</div>
           <Text type="secondary" style={{ fontSize: '12px' }}>
-            {record.psicologo?.psicologLogin || ''}
+            ID: {record.psicologId || 'N/A'}
           </Text>
         </div>
       ),
@@ -136,10 +142,26 @@ const UsuariosList: React.FC = () => {
       ),
     },
     {
+      title: 'Tipo',
+      dataIndex: 'tipoNome',
+      key: 'tipo',
+      render: (text: string) => <Tag color="blue">{text || 'N/A'}</Tag>,
+    },
+    {
       title: 'Ações',
       key: 'actions',
       render: (_: any, record: Usuario) => (
         <Space>
+          <Tooltip title="Editar usuário">
+            <Button
+              type="text"
+              icon={<EditOutlined />}
+              onClick={() => {
+                setEditingUsuario(record);
+                setModalVisible(true);
+              }}
+            />
+          </Tooltip>
           <Tooltip title={record.status ? 'Desativar usuário' : 'Ativar usuário'}>
             <Switch
               checked={record.status}
@@ -198,6 +220,13 @@ const UsuariosList: React.FC = () => {
           </Col>
           <Col>
             <Space>
+              <Button 
+                type="primary"
+                icon={<PlusOutlined />} 
+                onClick={() => setModalVisible(true)}
+              >
+                Novo Usuário
+              </Button>
               <Button 
                 icon={<ReloadOutlined />} 
                 onClick={loadUsuarios}
@@ -272,6 +301,34 @@ const UsuariosList: React.FC = () => {
           />
         </Space>
       </Card>
+
+      {/* Modal de Criação/Edição */}
+      <Modal
+        title={editingUsuario ? 'Editar Usuário' : 'Novo Usuário'}
+        open={modalVisible}
+        onCancel={() => {
+          setModalVisible(false);
+          setEditingUsuario(null);
+        }}
+        footer={null}
+        width={600}
+        destroyOnClose={true}
+      >
+        {modalVisible && (
+          <UsuariosForm
+            usuario={editingUsuario}
+            onSuccess={() => {
+              setModalVisible(false);
+              setEditingUsuario(null);
+              loadUsuarios();
+            }}
+            onCancel={() => {
+              setModalVisible(false);
+              setEditingUsuario(null);
+            }}
+          />
+        )}
+      </Modal>
     </div>
   );
 };

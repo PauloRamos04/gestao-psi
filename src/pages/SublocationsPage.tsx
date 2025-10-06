@@ -73,56 +73,11 @@ const SublocationsPage: React.FC = () => {
   const loadSublocations = async () => {
     setLoading(true);
     try {
-      // Simular carregamento de dados
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // TODO: Implementar endpoint para buscar sublocações
+      // const data = await apiService.getSublocations();
+      // setSublocations(data);
       
-      // Dados mockados para demonstração
-      const mockData: Sublocation[] = [
-        {
-          id: 1,
-          roomName: 'Sala 1 - Individual',
-          tenantName: 'Dr. Carlos Silva',
-          tenantType: 'psychologist',
-          startDate: '2024-01-01',
-          endDate: '2024-12-31',
-          monthlyRate: 800,
-          status: 'active',
-          totalSessions: 45,
-          totalRevenue: 3600,
-          lastPayment: '2024-01-05',
-          nextPayment: '2024-02-05'
-        },
-        {
-          id: 2,
-          roomName: 'Sala 2 - Casal',
-          tenantName: 'Dra. Ana Costa',
-          tenantType: 'therapist',
-          startDate: '2024-02-01',
-          endDate: '2024-11-30',
-          monthlyRate: 1000,
-          status: 'active',
-          totalSessions: 38,
-          totalRevenue: 3800,
-          lastPayment: '2024-01-10',
-          nextPayment: '2024-02-10'
-        },
-        {
-          id: 3,
-          roomName: 'Sala 3 - Grupo',
-          tenantName: 'Dr. Pedro Santos',
-          tenantType: 'psychologist',
-          startDate: '2024-03-01',
-          endDate: '2024-12-31',
-          monthlyRate: 1200,
-          status: 'pending',
-          totalSessions: 0,
-          totalRevenue: 0,
-          lastPayment: '',
-          nextPayment: '2024-02-01'
-        }
-      ];
-
-      setSublocations(mockData);
+      setSublocations([]);
     } catch (error) {
       message.error('Erro ao carregar sublocações');
     } finally {

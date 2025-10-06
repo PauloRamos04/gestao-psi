@@ -111,61 +111,11 @@ const DownloadsPage: React.FC = () => {
   const loadDownloads = async () => {
     setLoading(true);
     try {
-      // Simular carregamento de dados
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // TODO: Implementar endpoint para buscar downloads
+      // const data = await apiService.getDownloads();
+      // setDownloads(data);
       
-      // Dados mockados para demonstração
-      const mockDownloads: DownloadItem[] = [
-        {
-          id: 1,
-          name: 'Relatório_Mensal_Janeiro_2024.pdf',
-          type: 'pdf',
-          size: '2.3 MB',
-          description: 'Relatório financeiro de janeiro de 2024',
-          category: 'reports',
-          status: 'available',
-          createdAt: '2024-01-31',
-          downloadCount: 3,
-          lastDownload: '2024-02-01'
-        },
-        {
-          id: 2,
-          name: 'Pacientes_Ativos_2024.xlsx',
-          type: 'excel',
-          size: '1.8 MB',
-          description: 'Lista de pacientes ativos em 2024',
-          category: 'patients',
-          status: 'available',
-          createdAt: '2024-01-15',
-          downloadCount: 5,
-          lastDownload: '2024-01-20'
-        },
-        {
-          id: 3,
-          name: 'Sessoes_Dezembro_2023.csv',
-          type: 'csv',
-          size: '945 KB',
-          description: 'Dados das sessões de dezembro de 2023',
-          category: 'sessions',
-          status: 'available',
-          createdAt: '2023-12-31',
-          downloadCount: 2,
-          lastDownload: '2024-01-05'
-        },
-        {
-          id: 4,
-          name: 'Backup_Completo_2024.json',
-          type: 'json',
-          size: '15.2 MB',
-          description: 'Backup completo dos dados de 2024',
-          category: 'backup',
-          status: 'generating',
-          createdAt: '2024-02-01',
-          downloadCount: 0
-        }
-      ];
-
-      setDownloads(mockDownloads);
+      setDownloads([]);
     } catch (error) {
       message.error('Erro ao carregar downloads');
     } finally {
@@ -175,28 +125,11 @@ const DownloadsPage: React.FC = () => {
 
   const loadDownloadRequests = async () => {
     try {
-      // Simular carregamento de requisições
-      const mockRequests: DownloadRequest[] = [
-        {
-          id: 1,
-          name: 'Relatório_Financeiro_Anual_2023.pdf',
-          type: 'pdf',
-          status: 'processing',
-          progress: 65,
-          createdAt: '2024-02-01T10:30:00',
-          estimatedTime: '5 minutos'
-        },
-        {
-          id: 2,
-          name: 'Dados_Pacientes_Completos.xlsx',
-          type: 'excel',
-          status: 'completed',
-          progress: 100,
-          createdAt: '2024-02-01T09:15:00'
-        }
-      ];
-
-      setDownloadRequests(mockRequests);
+      // TODO: Implementar endpoint para buscar requisições de download
+      // const data = await apiService.getDownloadRequests();
+      // setDownloadRequests(data);
+      
+      setDownloadRequests([]);
     } catch (error) {
       message.error('Erro ao carregar requisições');
     }

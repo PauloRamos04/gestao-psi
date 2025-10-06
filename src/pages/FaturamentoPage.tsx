@@ -24,6 +24,8 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import apiService from '../services/api';
 import { FiltroPeriodo, Pagamento } from '../types';
+import SimpleBarChart from '../components/common/SimpleBarChart';
+import SimplePieChart from '../components/common/SimplePieChart';
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -98,7 +100,7 @@ const FaturamentoPage: React.FC = () => {
     const dadosPorTipo: { [key: string]: { valor: number; quantidade: number } } = {};
     
     pagamentos.forEach(pagamento => {
-      const tipo = pagamento.tipoPagamento?.nome || 'Não informado';
+      const tipo = pagamento.tipoPagamentoNome || 'Não informado';
       if (!dadosPorTipo[tipo]) {
         dadosPorTipo[tipo] = { valor: 0, quantidade: 0 };
       }
@@ -129,7 +131,25 @@ const FaturamentoPage: React.FC = () => {
   };
 
   const handleExport = () => {
-    message.info('Funcionalidade de exportação em desenvolvimento');
+    if (faturamentoData.pagamentos.length === 0) {
+      message.warning('Não há dados para exportar');
+      return;
+    }
+
+    // Exportar como CSV
+    const headers = 'Data,Paciente,Valor,Tipo\n';
+    const rows = faturamentoData.pagamentos.map(pag => 
+      `${formatDate(pag.data)},"${pag.pacienteNome || 'N/A'}",${pag.valor},"${pag.tipoPagamentoNome || 'N/A'}"`
+    ).join('\n');
+    
+    const csv = headers + rows;
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `faturamento_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    
+    message.success('Relatório de faturamento exportado!');
   };
 
   const columns = [
@@ -141,7 +161,7 @@ const FaturamentoPage: React.FC = () => {
     },
     {
       title: 'Paciente',
-      dataIndex: ['paciente', 'nome'],
+      dataIndex: 'pacienteNome',
       key: 'paciente',
     },
     {
@@ -156,7 +176,7 @@ const FaturamentoPage: React.FC = () => {
     },
     {
       title: 'Tipo',
-      dataIndex: ['tipoPagamento', 'nome'],
+      dataIndex: 'tipoPagamentoNome',
       key: 'tipo',
     },
   ];
@@ -254,28 +274,25 @@ const FaturamentoPage: React.FC = () => {
       <Row gutter={16}>
         <Col span={12}>
           <Card title="Faturamento por Mês" extra={<LineChartOutlined />}>
-            <div style={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div className="text-center">
-                <PieChartOutlined style={{ fontSize: 48, color: '#1890ff' }} />
-                <p className="mt-2 text-gray-600">Gráfico em desenvolvimento</p>
-                <p className="text-sm text-gray-500">
-                  {faturamentoData.porMes.length} meses de dados disponíveis
-                </p>
-              </div>
-            </div>
+            <SimpleBarChart
+              data={faturamentoData.porMes.map(item => ({ 
+                label: item.mes, 
+                value: item.valor 
+              }))}
+              valueFormatter={formatCurrency}
+              color="#1890ff"
+            />
           </Card>
         </Col>
         <Col span={12}>
           <Card title="Faturamento por Tipo de Pagamento" extra={<PieChartOutlined />}>
-            <div style={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div className="text-center">
-                <BarChartOutlined style={{ fontSize: 48, color: '#52c41a' }} />
-                <p className="mt-2 text-gray-600">Gráfico em desenvolvimento</p>
-                <p className="text-sm text-gray-500">
-                  {faturamentoData.porTipo.length} tipos de pagamento
-                </p>
-              </div>
-            </div>
+            <SimplePieChart
+              data={faturamentoData.porTipo.map(item => ({ 
+                label: item.tipo, 
+                value: item.valor 
+              }))}
+              valueFormatter={formatCurrency}
+            />
           </Card>
         </Col>
       </Row>

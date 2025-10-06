@@ -17,7 +17,8 @@ import {
   Input,
   Select,
   message,
-  Tooltip
+  Tooltip,
+  Modal
 } from 'antd';
 import {
   CalendarOutlined,
@@ -33,6 +34,7 @@ import {
 import { useAuth } from '../../../contexts/AuthContext';
 import { Sessao, FiltroPeriodo, FiltroDia } from '../../../types';
 import apiService from '../../../services/api';
+import SessoesForm from './SessoesForm';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import dayjs from 'dayjs';
@@ -49,6 +51,8 @@ const SessoesList: React.FC = () => {
   const [dataInicio, setDataInicio] = useState('');
   const [dataFim, setDataFim] = useState('');
   const [dataHoje, setDataHoje] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editingSessao, setEditingSessao] = useState<Sessao | null>(null);
 
   const loadSessoesHoje = useCallback(async () => {
     if (!user?.clinicaId || !user?.psicologId) return;
@@ -159,7 +163,7 @@ const SessoesList: React.FC = () => {
             icon={<UserOutlined />} 
             style={{ backgroundColor: '#52c41a' }}
           />
-          <Text strong>{record.paciente?.nome || 'N/A'}</Text>
+          <Text strong>{record.pacienteNome || 'N/A'}</Text>
         </Space>
       ),
     },
@@ -169,7 +173,7 @@ const SessoesList: React.FC = () => {
       render: (_: any, record: Sessao) => (
         <Space>
           <EnvironmentOutlined style={{ color: '#fa8c16' }} />
-          <Text>{record.sala?.nome || 'N/A'}</Text>
+          <Text>{record.salaNome || 'Sem sala'}</Text>
         </Space>
       ),
     },
@@ -185,9 +189,9 @@ const SessoesList: React.FC = () => {
     },
   ];
 
-  const activeSessions = sessoes.filter(s => s.status === 'ATIVA').length;
-  const completedSessions = sessoes.filter(s => s.status === 'CONCLUIDA').length;
-  const cancelledSessions = sessoes.filter(s => s.status === 'CANCELADA').length;
+  const activeSessions = sessoes.filter(s => s.status === true).length;
+  const completedSessions = sessoes.filter(s => s.status === false).length;
+  const cancelledSessions = 0; // Não há status cancelado nesta versão
 
   return (
     <div style={{ padding: '24px' }}>
@@ -208,10 +212,14 @@ const SessoesList: React.FC = () => {
             </Space>
           </Col>
           <Col>
-            <Button 
-              type="primary" 
+            <Button
+              type="primary"
               icon={<PlusOutlined />}
               size="large"
+              onClick={() => {
+                setEditingSessao(null);
+                setModalVisible(true);
+              }}
             >
               Nova Sessão
             </Button>
@@ -357,6 +365,38 @@ const SessoesList: React.FC = () => {
           />
         )}
       </Card>
+
+      {/* Modal de Criação/Edição */}
+      <Modal
+        title={editingSessao ? 'Editar Sessão' : 'Nova Sessão'}
+        open={modalVisible}
+        onCancel={() => {
+          setModalVisible(false);
+          setEditingSessao(null);
+        }}
+        footer={null}
+        width={600}
+        destroyOnClose={true}
+      >
+        {modalVisible && (
+          <SessoesForm
+            sessao={editingSessao || undefined}
+            onSuccess={() => {
+              setModalVisible(false);
+              setEditingSessao(null);
+              if (filtro === 'hoje') {
+                loadSessoesHoje();
+              } else {
+                loadSessoesPeriodo();
+              }
+            }}
+            onCancel={() => {
+              setModalVisible(false);
+              setEditingSessao(null);
+            }}
+          />
+        )}
+      </Modal>
     </div>
   );
 };

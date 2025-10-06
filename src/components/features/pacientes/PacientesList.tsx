@@ -57,7 +57,7 @@ const PacientesList: React.FC = () => {
     
     setLoading(true);
     try {
-      const data = await apiService.getPacientes(user.clinicaId, user.psicologId);
+      const data = await apiService.getPacientesList(user.clinicaId, user.psicologId);
       setPacientes(data);
     } catch (error) {
       message.error('Erro ao carregar pacientes');
@@ -83,7 +83,7 @@ const PacientesList: React.FC = () => {
 
   const handleDelete = async (id: number) => {
     try {
-      // Aqui você implementaria a chamada para deletar
+      await apiService.deletarPaciente(id);
       message.success('Paciente removido com sucesso');
       loadPacientes();
     } catch (error) {
@@ -95,18 +95,24 @@ const PacientesList: React.FC = () => {
     try {
       const values = await form.validateFields();
       
+      const data = {
+        clinicaId: user!.clinicaId,
+        psicologId: user!.psicologId,
+        nome: values.nome
+      };
+      
       if (editingPaciente) {
-        // Atualizar paciente existente
+        await apiService.atualizarPaciente(editingPaciente.id, data);
         message.success('Paciente atualizado com sucesso');
       } else {
-        // Criar novo paciente
+        await apiService.criarPaciente(data);
         message.success('Paciente criado com sucesso');
       }
       
       setModalVisible(false);
       loadPacientes();
-    } catch (error) {
-      message.error('Erro ao salvar paciente');
+    } catch (error: any) {
+      message.error(error.response?.data?.message || 'Erro ao salvar paciente');
     }
   };
 
@@ -140,7 +146,7 @@ const PacientesList: React.FC = () => {
         <div>
           <div style={{ fontWeight: 500 }}>{text}</div>
           <div style={{ fontSize: '12px', color: '#666' }}>
-            {record.psicologo?.nome}
+            {record.psicologoNome || 'N/A'}
           </div>
         </div>
       ),

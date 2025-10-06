@@ -18,6 +18,9 @@ export { default as PagamentosList } from './pagamentos/PagamentosList';
 // Clínicas
 export { default as ClinicasList } from './clinicas/ClinicasList';
 
+// Psicólogos
+export { default as PsicologosList } from './psicologos/PsicologosList';
+
 // Salas
 export { default as SalasList } from './salas/SalasList';
 

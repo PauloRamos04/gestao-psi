@@ -136,10 +136,10 @@ const Dashboard: React.FC = () => {
           <Col>
             <Space direction="vertical" size="small">
               <Title level={2} style={{ margin: 0 }}>
-                Bem-vindo, {user?.titulo || 'Usuário'}!
+                Bem-vindo, {user?.tituloSite || 'Usuário'}!
               </Title>
               <Text type="secondary" style={{ fontSize: '16px' }}>
-                {user?.clinica?.nome || 'Clínica'} • {user?.psicologo?.nome || 'Psicólogo'}
+                {user?.clinicaNome || 'Clínica'} • {user?.psicologoNome || 'Psicólogo'}
               </Text>
             </Space>
           </Col>
@@ -209,10 +209,10 @@ const Dashboard: React.FC = () => {
                       }
                       title={
                         <Space>
-                          <Text strong>{sessao.paciente?.nome || 'Paciente'}</Text>
-                          {sessao.status === 'ATIVA' ? (
+                          <Text strong>{sessao.pacienteNome || 'Paciente'}</Text>
+                          {sessao.status ? (
                             <Tag color="green" icon={<CheckCircleOutlined />}>
-                              Ativa
+                              Confirmada
                             </Tag>
                           ) : (
                             <Tag color="orange" icon={<ExclamationCircleOutlined />}>
@@ -225,7 +225,7 @@ const Dashboard: React.FC = () => {
                         <Space>
                           <Text type="secondary">{sessao.hora}</Text>
                           <Text type="secondary">•</Text>
-                          <Text type="secondary">Sala {sessao.sala?.nome || 'N/A'}</Text>
+                          <Text type="secondary">Sala {sessao.salaNome || 'N/A'}</Text>
                         </Space>
                       }
                     />
