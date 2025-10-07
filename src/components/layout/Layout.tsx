@@ -54,6 +54,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [notificacoes, setNotificacoes] = useState<{ id: number; titulo: string; conteudo: string; }[]>([]);
   const [notifLoading, setNotifLoading] = useState(false);
+  const [darkMode, setDarkMode] = useState<boolean>(localStorage.getItem('darkMode') === 'true');
   const { user, logout } = useAuth();
   const { canAccessMenu } = usePermissions();
   const location = useLocation();
@@ -88,6 +89,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     };
     carregar();
   }, []);
+
+  // Aplicar tema escuro/claro
+  useEffect(() => {
+    const body = document.body;
+    if (darkMode) {
+      body.setAttribute('data-theme', 'dark');
+    } else {
+      body.removeAttribute('data-theme');
+    }
+    localStorage.setItem('darkMode', String(darkMode));
+  }, [darkMode]);
 
   const allMenuItems = [
     {
@@ -313,7 +325,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: collapsed ? 'center' : 'flex-start',
-            borderBottom: '1px solid #f0f0f0',
+            borderBottom: '1px solid var(--border)',
             backgroundColor: '#1890ff',
             flexShrink: 0
           }}>
@@ -344,6 +356,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   marginLeft: '12px',
                   whiteSpace: 'nowrap'
                 }}
+                className="sidebar-logo-title"
               >
                 Gestão PSI
               </Text>
@@ -354,10 +367,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <div style={{ 
             flex: 1,
             overflow: 'auto',
-            backgroundColor: '#fff'
+            backgroundColor: 'var(--surface-2)'
           }}>
             <Menu
-              theme="light"
+              theme={darkMode ? 'dark' : 'light'}
               mode="inline"
               selectedKeys={[location.pathname]}
               items={menuItems}
@@ -372,8 +385,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           {/* User Info */}
           <div style={{
             padding: '16px',
-            borderTop: '1px solid #f0f0f0',
-            backgroundColor: '#fafafa',
+            borderTop: '1px solid var(--border)',
+            backgroundColor: 'var(--surface-2)',
             flexShrink: 0
           }}>
             <Dropdown
@@ -387,19 +400,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 cursor: 'pointer',
                 padding: '8px',
                 borderRadius: '6px',
-                transition: 'background-color 0.2s'
+                transition: 'background-color 0.2s',
+                color: 'var(--text)'
               }}>
                 <Avatar
                   size={collapsed ? 24 : 32}
-                  style={{ backgroundColor: '#1890ff' }}
+                  style={{ backgroundColor: 'var(--primary)' }}
                   icon={<UserOutlined />}
                 />
                 {!collapsed && (
                   <div style={{ marginLeft: '12px', flex: 1 }}>
-                    <div style={{ fontSize: '14px', fontWeight: 500, color: '#262626' }}>
+                    <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text)' }}>
                       {user?.tituloSite || 'Usuário'}
                     </div>
-                    <div style={{ fontSize: '12px', color: '#8c8c8c' }}>
+                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
                       {user?.clinicaNome || 'Clínica'}
                     </div>
                   </div>
@@ -418,8 +432,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {/* Header */}
         <Header style={{
           padding: '0 24px',
-          background: '#fff',
-          borderBottom: '1px solid #f0f0f0',
+          background: 'var(--surface)',
+          borderBottom: '1px solid var(--border)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -439,12 +453,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               style={{
                 fontSize: '16px',
                 width: 64,
-                height: 64
+                height: 64,
+                color: 'var(--text)'
               }}
             />
           </div>
 
           <Space size="middle">
+            <Button type={darkMode ? 'primary' : 'default'} onClick={() => setDarkMode(!darkMode)}>
+              {darkMode ? 'Claro' : 'Escuro'}
+            </Button>
             <Popover
               trigger="click"
               placement="bottomRight"
@@ -475,7 +493,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               }
             >
               <Badge count={notificacoes.length} size="small">
-                <Button type="text" icon={<BellOutlined />} style={{ fontSize: '16px' }} />
+                <Button type="text" icon={<BellOutlined />} style={{ fontSize: '16px', color: 'var(--text)' }} />
               </Badge>
             </Popover>
           </Space>
@@ -485,7 +503,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <Content style={{
           margin: '24px 24px',
           padding: '32px',
-          background: '#fff',
+          background: 'var(--surface)',
           borderRadius: '12px',
           minHeight: 'calc(100vh - 112px)',
           overflow: 'auto'

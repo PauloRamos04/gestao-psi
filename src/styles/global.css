@@ -6,6 +6,25 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 /* Reset e Base */
+:root {
+  --bg: #f9fafb;
+  --surface: #ffffff;
+  --surface-2: #fafafa;
+  --text: #111827;
+  --text-secondary: #6b7280;
+  --border: #e5e7eb;
+  --primary: var(--primary-color, #667eea);
+}
+
+body[data-theme="dark"] {
+  --bg: #0b1220;
+  --surface: #0f172a;
+  --surface-2: #111827;
+  --text: #e5e7eb;
+  --text-secondary: #9aa4b2;
+  --border: #1f2937;
+  --primary: var(--primary-color, #8b95ff);
+}
 * {
   margin: 0;
   padding: 0;
@@ -27,8 +46,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
-  background-color: #f9fafb;
-  color: #111827;
+  background-color: var(--bg);
+  color: var(--text);
 }
 
 code {
@@ -140,25 +159,27 @@ code {
 }
 
 .ant-btn-primary {
-  background: #667eea !important;
+  background: var(--primary) !important;
   border: none !important;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15) !important;
 }
 
 .ant-btn-primary:hover {
-  background: #5568d3 !important;
+  background: var(--primary) !important;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25) !important;
   transform: translateY(-1px);
 }
 
 .ant-btn-default {
   border-radius: 8px !important;
-  border: 1px solid #d9d9d9;
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
 }
 
 .ant-btn-default:hover {
-  border-color: #667eea;
-  color: #667eea;
+  border-color: var(--primary);
+  color: var(--primary) !important;
 }
 
 /* Inputs e Selects */
@@ -166,18 +187,41 @@ code {
 .ant-input-affix-wrapper,
 .ant-select-selector {
   border-radius: 8px !important;
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
 }
+
+/* DatePicker, RangePicker, Select dropdown trigger */
+.ant-picker, .ant-select-selector, .ant-input-number, .ant-input-number-input {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+.ant-input-number-handler-wrap { background: var(--surface-2) !important; }
+.ant-picker-input > input::placeholder { color: var(--text-secondary) !important; }
+
 
 /* Cards */
 .ant-card {
   border-radius: 12px !important;
+  background: var(--surface) !important;
+  color: var(--text) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
   margin-bottom: 24px !important;
+  border: 1px solid var(--border) !important;
 }
 
 .ant-card:hover {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
 }
+
+/* Card headers e bordas */
+.ant-card-head, .ant-card-bordered {
+  border-color: var(--border) !important;
+  background: var(--surface) !important;
+}
+.ant-card-head-title { color: var(--text) !important; }
 
 /* Espaçamento entre elementos */
 .ant-space {
@@ -196,6 +240,138 @@ code {
 /* Tabelas com espaçamento */
 .ant-table-wrapper {
   margin-top: 24px;
+}
+
+/* Tabelas */
+.ant-table, .ant-table-container, .ant-table-content, .ant-table-thead > tr > th, .ant-table-tbody > tr > td {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+.ant-table-thead > tr > th {
+  background: var(--surface-2) !important;
+}
+.ant-table-row:hover > td {
+  background: rgba(255,255,255,0.04) !important;
+}
+
+/* Ant Layout */
+.ant-layout,
+.ant-layout-content {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+.ant-layout-sider,
+.ant-menu,
+.ant-menu-item,
+.ant-menu-submenu-title {
+  background: var(--surface-2) !important;
+  color: var(--text) !important;
+}
+
+/* Forçar título branco no topo da sidebar em ambos os temas */
+.sidebar-logo-title { color: #ffffff !important; }
+.ant-menu-item a { color: var(--text) !important; }
+.ant-menu-item-selected a { color: var(--primary) !important; }
+
+.ant-menu-item-selected,
+.ant-menu-item-active {
+  background: rgba(255,255,255,0.06) !important;
+  color: var(--primary) !important;
+}
+
+/* Headers, Popovers, Modals */
+.ant-popover-inner,
+.ant-modal-content,
+.ant-dropdown-menu,
+.ant-select-dropdown,
+.ant-picker-panel-container {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+.ant-dropdown-menu-item, .ant-dropdown-menu-submenu-title {
+  color: var(--text) !important;
+}
+.ant-dropdown-menu-item:hover {
+  background: rgba(255,255,255,0.06) !important;
+}
+.ant-popover-arrow, .ant-tooltip-arrow, .ant-dropdown-arrow {
+  border-color: var(--surface) !important;
+}
+
+.ant-typography,
+.ant-statistic,
+.ant-list,
+.ant-form-item-label > label,
+.ant-table,
+.ant-table-thead > tr > th,
+.ant-table-tbody > tr > td {
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+.ant-statistic-title, .ant-typography h1, .ant-typography h2, .ant-typography h3, h1, h2, h3, h4 {
+  color: var(--text) !important;
+}
+
+/* List, Divider, Alert borders */
+.ant-list, .ant-list-item, .ant-divider, .ant-alert {
+  border-color: var(--border) !important;
+}
+.ant-list-item { background: var(--surface) !important; }
+
+/* Alerts (remover caixas claras no dark) */
+.ant-alert,
+.ant-alert-info,
+.ant-alert-warning,
+.ant-alert-success,
+.ant-alert-error {
+  background: var(--surface-2) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+.ant-alert-message, .ant-alert-description { color: var(--text) !important; }
+.ant-alert-icon { filter: brightness(1.1); }
+
+/* Inputs placeholders */
+.ant-input::placeholder, .ant-select-selection-placeholder {
+  color: var(--text-secondary) !important;
+}
+.ant-input, .ant-input-affix-wrapper { box-shadow: none !important; }
+.ant-input-affix-wrapper, .ant-input-search .ant-input, .ant-input-search .ant-input-affix-wrapper {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+}
+
+/* Tabs underline/border */
+.ant-tabs-nav, .ant-tabs-content-holder { border-color: var(--border) !important; }
+.ant-tabs-ink-bar { background: var(--primary) !important; }
+
+/* Empty states */
+.ant-empty-description { color: var(--text-secondary) !important; }
+
+/* Tags, Badges, Pagination */
+.ant-tag-default {
+  background: var(--surface-2) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+.ant-badge-count {
+  box-shadow: none !important;
+}
+.ant-pagination, .ant-pagination-item, .ant-pagination-options, .ant-pagination-item a {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+/* Switch, Segmented */
+.ant-switch {
+  background: var(--surface-2) !important;
+}
+.ant-switch-checked {
+  background: var(--primary) !important;
 }
 
 /* Formulários com espaçamento */
