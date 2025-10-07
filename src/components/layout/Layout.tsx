@@ -102,17 +102,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }, [darkMode]);
 
   const allMenuItems = [
+    // === ÁREA COMUM (Funcionário, Psicólogo, Admin) ===
     {
       key: '/dashboard',
       menuKey: 'dashboard',
       icon: <HomeOutlined />,
       label: <Link to="/dashboard">Dashboard</Link>,
-    },
-    {
-      key: '/usuarios',
-      menuKey: 'usuarios',
-      icon: <TeamOutlined />,
-      label: <Link to="/usuarios">Usuários</Link>,
     },
     {
       key: '/pacientes',
@@ -133,28 +128,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       label: <Link to="/pagamentos">Pagamentos</Link>,
     },
     {
-      key: '/faturamento',
-      menuKey: 'faturamento',
-      icon: <DollarOutlined />,
-      label: <Link to="/faturamento">Faturamento</Link>,
-    },
-    {
       key: '/mensagens',
       menuKey: 'mensagens',
       icon: <MessageOutlined />,
       label: <Link to="/mensagens">Mensagens</Link>,
-    },
-    {
-      key: '/clinicas',
-      menuKey: 'clinicas',
-      icon: <BankOutlined />,
-      label: <Link to="/clinicas">Clínicas</Link>,
-    },
-    {
-      key: '/psicologos',
-      menuKey: 'psicologos',
-      icon: <UserOutlined />,
-      label: <Link to="/psicologos">Psicólogos</Link>,
     },
     {
       key: '/salas',
@@ -162,11 +139,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       icon: <EnvironmentOutlined />,
       label: <Link to="/salas">Salas</Link>,
     },
+    
+    // === ÁREA CLÍNICA (Psicólogo, Admin) ===
     {
       key: '/prontuarios',
       menuKey: 'prontuarios',
       icon: <FileTextOutlined />,
       label: <Link to="/prontuarios">Prontuários</Link>,
+    },
+    {
+      key: '/faturamento',
+      menuKey: 'faturamento',
+      icon: <DollarOutlined />,
+      label: <Link to="/faturamento">Faturamento</Link>,
     },
     {
       key: '/relatorios',
@@ -180,11 +165,25 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       icon: <HistoryOutlined />,
       label: <Link to="/historicos">Históricos</Link>,
     },
+    
+    // === ÁREA ADMINISTRATIVA (Apenas Admin) ===
     {
-      key: '/logs',
-      menuKey: 'logs',
-      icon: <AuditOutlined />,
-      label: <Link to="/logs">Logs do Sistema</Link>,
+      key: '/clinicas',
+      menuKey: 'clinicas',
+      icon: <BankOutlined />,
+      label: <Link to="/clinicas">Clínicas</Link>,
+    },
+    {
+      key: '/psicologos',
+      menuKey: 'psicologos',
+      icon: <TeamOutlined />,
+      label: <Link to="/psicologos">Psicólogos</Link>,
+    },
+    {
+      key: '/usuarios',
+      menuKey: 'usuarios',
+      icon: <TeamOutlined />,
+      label: <Link to="/usuarios">Usuários</Link>,
     },
     {
       key: '/sublocacoes',
@@ -203,6 +202,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       menuKey: 'downloads',
       icon: <DownloadOutlined />,
       label: <Link to="/downloads">Downloads</Link>,
+    },
+    {
+      key: '/logs',
+      menuKey: 'logs',
+      icon: <AuditOutlined />,
+      label: <Link to="/logs">Logs do Sistema</Link>,
     },
   ];
 
