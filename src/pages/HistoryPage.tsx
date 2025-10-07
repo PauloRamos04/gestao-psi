@@ -34,6 +34,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { format, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import apiService from '../services/api';
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -72,16 +73,48 @@ const HistoryPage: React.FC = () => {
   ];
 
   const loadHistoryData = async () => {
+    if (!user?.clinicaId || !user?.psicologId) return;
+    
     setLoading(true);
     try {
-      // TODO: Implementar endpoint para buscar histórico
-      // const history = await apiService.getHistory(selectedPeriod, dateRange);
-      // setHistoryData(history.data);
-      // setRoomUsage(history.roomUsage);
+      const period = periodOptions.find(p => p.key === selectedPeriod);
+      const months = period?.months || 6;
       
-      setHistoryData([]);
-      setRoomUsage([]);
-      message.success('Dados históricos carregados com sucesso!');
+      const timeline = await apiService.getHistoricoTimeline(
+        user.clinicaId, 
+        user.psicologId, 
+        months
+      );
+      
+      setHistoryData(timeline.map((item: any) => ({
+        period: `${item.monthName}/${item.year}`,
+        sessions: item.sessions,
+        revenue: item.revenue,
+        patients: 0,
+        rooms: 0,
+        trend: 'stable',
+        percentage: 0
+      })));
+      
+      const inicio = new Date();
+      inicio.setMonth(inicio.getMonth() - months);
+      const fim = new Date();
+      
+      const salas = await apiService.getHistoricoSalas(
+        user.clinicaId,
+        user.psicologId,
+        inicio.toISOString().split('T')[0],
+        fim.toISOString().split('T')[0]
+      );
+      
+      setRoomUsage(salas.map((item: any) => ({
+        roomName: item.sala,
+        usageCount: item.count,
+        totalHours: item.count * 1,
+        percentage: item.percentage
+      })));
+      
+      message.success('Dados históricos carregados!');
     } catch (error) {
       message.error('Erro ao carregar dados históricos');
     } finally {

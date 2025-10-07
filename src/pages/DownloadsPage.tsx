@@ -36,6 +36,7 @@ import {
   CloudDownloadOutlined
 } from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
+import apiService from '../services/api';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -155,16 +156,13 @@ const DownloadsPage: React.FC = () => {
     try {
       const values = await form.validateFields();
       
-      const newRequest: DownloadRequest = {
-        id: Math.max(...downloadRequests.map(r => r.id)) + 1,
-        name: `${values.category}_${format(new Date(), 'yyyy-MM-dd')}.${values.type}`,
+      await apiService.solicitarDownload({
+        category: values.category,
         type: values.type,
-        status: 'pending',
-        progress: 0,
-        createdAt: format(new Date(), 'yyyy-MM-dd HH:mm:ss')
-      };
+        inicio: values.dateRange?.[0]?.format?.('YYYY-MM-DD'),
+        fim: values.dateRange?.[1]?.format?.('YYYY-MM-DD')
+      });
       
-      setDownloadRequests(prev => [newRequest, ...prev]);
       setRequestModalVisible(false);
       form.resetFields();
       message.success('Solicitação de download criada com sucesso!');

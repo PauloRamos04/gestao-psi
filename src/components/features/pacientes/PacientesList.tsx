@@ -29,6 +29,7 @@ import {
 import { useAuth } from '../../../contexts/AuthContext';
 import apiService from '../../../services/api';
 import { Paciente, Clinica, Psicologo } from '../../../types';
+import PacienteForm from './PacienteForm';
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
@@ -323,39 +324,18 @@ const PacientesList: React.FC = () => {
       <Modal
         title={editingPaciente ? 'Editar Paciente' : 'Novo Paciente'}
         open={modalVisible}
-        onOk={handleModalOk}
         onCancel={handleModalCancel}
-        width={600}
+        footer={null}
+        width={900}
       >
-        <Form
-          form={form}
-          layout="vertical"
-          initialValues={{
-            status: true
+        <PacienteForm
+          paciente={editingPaciente}
+          onSuccess={() => {
+            handleModalCancel();
+            loadPacientes();
           }}
-        >
-          <Form.Item
-            name="nome"
-            label="Nome do Paciente"
-            rules={[
-              { required: true, message: 'Por favor, insira o nome do paciente' },
-              { min: 2, message: 'Nome deve ter pelo menos 2 caracteres' }
-            ]}
-          >
-            <Input placeholder="Digite o nome completo do paciente" />
-          </Form.Item>
-
-          <Form.Item
-            name="status"
-            label="Status"
-            rules={[{ required: true, message: 'Por favor, selecione o status' }]}
-          >
-            <Select placeholder="Selecione o status">
-              <Option value={true}>Ativo</Option>
-              <Option value={false}>Inativo</Option>
-            </Select>
-          </Form.Item>
-        </Form>
+          onCancel={handleModalCancel}
+        />
       </Modal>
     </div>
   );

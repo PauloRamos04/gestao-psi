@@ -22,6 +22,7 @@ import {
   SecurityScanOutlined
 } from '@ant-design/icons';
 import { useAuth } from '../../../contexts/AuthContext';
+import apiService from '../../../services/api';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -118,11 +119,10 @@ const PasswordChange: React.FC = () => {
     setLoading(true);
     
     try {
-      // Simular chamada à API
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Aqui seria feita a chamada real para o backend
-      // await apiService.changePassword(values);
+      await apiService.trocarSenha({
+        currentPassword: values.currentPassword,
+        newPassword: values.newPassword
+      });
       
       message.success('Senha alterada com sucesso!');
       form.resetFields();

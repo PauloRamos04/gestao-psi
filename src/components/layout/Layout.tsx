@@ -33,7 +33,8 @@ import {
   LockOutlined,
   HistoryOutlined,
   DownloadOutlined,
-  BulbOutlined
+  BulbOutlined,
+  AuditOutlined
 } from '@ant-design/icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePermissions } from '../../hooks/usePermissions';
@@ -166,6 +167,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       menuKey: 'historicos',
       icon: <HistoryOutlined />,
       label: <Link to="/historicos">Históricos</Link>,
+    },
+    {
+      key: '/logs',
+      menuKey: 'logs',
+      icon: <AuditOutlined />,
+      label: <Link to="/logs">Logs do Sistema</Link>,
     },
     {
       key: '/sublocacoes',

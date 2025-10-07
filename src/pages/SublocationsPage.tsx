@@ -34,6 +34,7 @@ import {
   FileTextOutlined
 } from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
+import apiService from '../services/api';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -73,11 +74,9 @@ const SublocationsPage: React.FC = () => {
   const loadSublocations = async () => {
     setLoading(true);
     try {
-      // TODO: Implementar endpoint para buscar sublocações
-      // const data = await apiService.getSublocations();
-      // setSublocations(data);
-      
-      setSublocations([]);
+      if (!user?.clinicaId) return;
+      const data = await apiService.getSublocacoes(user.clinicaId);
+      setSublocations(data);
     } catch (error) {
       message.error('Erro ao carregar sublocações');
     } finally {
@@ -110,8 +109,10 @@ const SublocationsPage: React.FC = () => {
       title: 'Confirmar exclusão',
       content: 'Tem certeza que deseja excluir esta sublocação?',
       onOk: () => {
-        setSublocations(prev => prev.filter(item => item.id !== id));
-        message.success('Sublocação excluída com sucesso!');
+        return apiService.deletarSublocacao(id).then(() => {
+          message.success('Sublocação excluída com sucesso!');
+          loadSublocations();
+        });
       }
     });
   };
@@ -121,26 +122,13 @@ const SublocationsPage: React.FC = () => {
       const values = await form.validateFields();
       
       if (editingSublocation) {
-        // Editar sublocação existente
-        setSublocations(prev => prev.map(item => 
-          item.id === editingSublocation.id 
-            ? { ...item, ...values }
-            : item
-        ));
+        await apiService.atualizarSublocacao(editingSublocation.id, values);
         message.success('Sublocação atualizada com sucesso!');
       } else {
-        // Adicionar nova sublocação
-        const newSublocation: Sublocation = {
-          id: Math.max(...sublocations.map(s => s.id)) + 1,
-          ...values,
-          totalSessions: 0,
-          totalRevenue: 0,
-          lastPayment: '',
-          nextPayment: format(new Date(), 'yyyy-MM-dd')
-        };
-        setSublocations(prev => [...prev, newSublocation]);
+        await apiService.criarSublocacao(user!.clinicaId, values);
         message.success('Sublocação adicionada com sucesso!');
       }
+      await loadSublocations();
       
       setModalVisible(false);
       form.resetFields();

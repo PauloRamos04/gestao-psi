@@ -271,6 +271,10 @@ class ApiService {
     return response.data;
   }
 
+  async trocarSenha(data: { currentPassword: string; newPassword: string }): Promise<void> {
+    await this.api.post('/auth/change-password', data);
+  }
+
   // ==================== CLÍNICAS ====================
   async getClinicas(): Promise<Clinica[]> {
     const response: AxiosResponse<Clinica[]> = await this.api.get('/clinicas');
@@ -323,6 +327,15 @@ class ApiService {
 
   async deletarPsicologo(id: number): Promise<void> {
     await this.api.delete(`/psicologos/${id}`);
+  }
+
+  async verificarPsicologoTemUsuario(id: number): Promise<boolean> {
+    const response: AxiosResponse<boolean> = await this.api.get(`/psicologos/${id}/tem-usuario`);
+    return response.data;
+  }
+
+  async criarUsuarioParaPsicologo(id: number, data: { username: string; senha: string; tipoUserId?: number }): Promise<void> {
+    await this.api.post(`/psicologos/${id}/criar-usuario`, data);
   }
 
   // ==================== CATEGORIAS ====================
@@ -413,6 +426,147 @@ class ApiService {
 
   async marcarTodasNotificacoesComoLidas(usuarioId: number): Promise<void> {
     await this.api.post(`/notificacoes/usuario/${usuarioId}/marcar-todas-lidas`);
+  }
+
+  // ==================== LOGS DE AUDITORIA ====================
+  async getLogs(page = 0, size = 50) {
+    const response = await this.api.get('/logs', {
+      params: { page, size }
+    });
+    return response.data;
+  }
+
+  async getLogsFiltrados(filtros: {
+    usuarioId?: number;
+    entidade?: string;
+    acao?: string;
+    modulo?: string;
+    clinicaId?: number;
+    inicio?: string;
+    fim?: string;
+    page?: number;
+    size?: number;
+  }) {
+    const response = await this.api.get('/logs/filtrar', {
+      params: filtros
+    });
+    return response.data;
+  }
+
+  async getLogsPorUsuario(usuarioId: number, page = 0, size = 50) {
+    const response = await this.api.get(`/logs/usuario/${usuarioId}`, {
+      params: { page, size }
+    });
+    return response.data;
+  }
+
+  async getLogsPorEntidade(entidade: string, page = 0, size = 50) {
+    const response = await this.api.get(`/logs/entidade/${entidade}`, {
+      params: { page, size }
+    });
+    return response.data;
+  }
+
+  async getLogsErros(page = 0, size = 50) {
+    const response = await this.api.get('/logs/erros', {
+      params: { page, size }
+    });
+    return response.data;
+  }
+
+  async getEstatisticasLogs(inicio?: string) {
+    const response = await this.api.get('/logs/estatisticas', {
+      params: { inicio }
+    });
+    return response.data;
+  }
+
+  // ==================== HISTÓRICO ====================
+  async getHistoricoDashboard(clinicaId: number, psicologId: number, inicio: string, fim: string) {
+    const response = await this.api.get('/historico/dashboard', {
+      params: { clinicaId, psicologId, inicio, fim }
+    });
+    return response.data;
+  }
+
+  async getHistoricoTimeline(clinicaId: number, psicologId: number, months: number) {
+    const response = await this.api.get('/historico/timeline', {
+      params: { clinicaId, psicologId, months }
+    });
+    return response.data;
+  }
+
+  async getHistoricoSalas(clinicaId: number, psicologId: number, inicio: string, fim: string) {
+    const response = await this.api.get('/historico/salas', {
+      params: { clinicaId, psicologId, inicio, fim }
+    });
+    return response.data;
+  }
+
+  async getHistoricoPacientesEvolucao(clinicaId: number, psicologId: number, months: number) {
+    const response = await this.api.get('/historico/pacientes/evolucao', {
+      params: { clinicaId, psicologId, months }
+    });
+    return response.data;
+  }
+
+  async getHistoricoFinanceiroEvolucao(clinicaId: number, psicologId: number, months: number) {
+    const response = await this.api.get('/historico/financeiro/evolucao', {
+      params: { clinicaId, psicologId, months }
+    });
+    return response.data;
+  }
+
+  // ==================== SUBLOCAÇÕES ====================
+  async getSublocacoes(clinicaId: number) {
+    const response = await this.api.get('/sublocacoes', { params: { clinicaId } });
+    return response.data;
+  }
+
+  async criarSublocacao(clinicaId: number, data: any) {
+    const response = await this.api.post('/sublocacoes', data, { params: { clinicaId } });
+    return response.data;
+  }
+
+  async atualizarSublocacao(id: number, data: any) {
+    const response = await this.api.put(`/sublocacoes/${id}`, data);
+    return response.data;
+  }
+
+  async deletarSublocacao(id: number) {
+    await this.api.delete(`/sublocacoes/${id}`);
+  }
+
+  // ==================== INTERAÇÕES ====================
+  async getSuggestions() {
+    const response = await this.api.get('/interacoes/sugestoes');
+    return response.data;
+  }
+
+  async createSuggestion(data: any) {
+    const response = await this.api.post('/interacoes/sugestoes', data);
+    return response.data;
+  }
+
+  async getRecommendations() {
+    const response = await this.api.get('/interacoes/indicacoes');
+    return response.data;
+  }
+
+  async createRecommendation(data: any) {
+    const response = await this.api.post('/interacoes/indicacoes', data);
+    return response.data;
+  }
+
+  // ==================== DOWNLOADS ====================
+  async solicitarDownload(data: { category: string; type: string; inicio?: string; fim?: string }) {
+    const response = await this.api.post('/downloads/solicitar', data);
+    return response.data;
+  }
+
+  async baixarArquivoExemploCsv(): Promise<Blob> {
+    const response = await this.api.get('/downloads/arquivo-exemplo', { responseType: 'blob' });
+    return response.data;
   }
 }
 

@@ -49,6 +49,9 @@ const PagamentosList: React.FC = () => {
   const totalPagamentos = pagamentos.length;
   const valorTotal = pagamentos.reduce((sum, p) => sum + p.valor, 0);
   const valorMedio = totalPagamentos > 0 ? valorTotal / totalPagamentos : 0;
+  const pagamentosConvenio = pagamentos.filter(p => p.ehConvenio);
+  const totalConvenio = pagamentosConvenio.reduce((sum, p) => sum + (p.valorConvenio || 0), 0);
+  const totalParticular = valorTotal - totalConvenio;
 
   useEffect(() => {
     loadPagamentos();
@@ -153,6 +156,21 @@ const PagamentosList: React.FC = () => {
       ),
     },
     {
+      title: 'Convênio',
+      key: 'convenio',
+      render: (_: any, record: Pagamento) => (
+        <div>
+          {record.ehConvenio ? (
+            <Tooltip title={`Guia: ${record.numeroGuia || 'N/A'}`}>
+              <Tag color="green">{record.convenio}</Tag>
+            </Tooltip>
+          ) : (
+            <Tag color="default">Particular</Tag>
+          )}
+        </div>
+      ),
+    },
+    {
       title: 'Ações',
       key: 'actions',
       width: 150,
@@ -211,8 +229,8 @@ const PagamentosList: React.FC = () => {
       </div>
 
       {/* Estatísticas */}
-      <Row gutter={16}>
-        <Col span={6}>
+      <Row gutter={[16, 16]}>
+        <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
               title="Total de Pagamentos"
@@ -221,7 +239,7 @@ const PagamentosList: React.FC = () => {
             />
           </Card>
         </Col>
-        <Col span={6}>
+        <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
               title="Valor Total"
@@ -231,22 +249,25 @@ const PagamentosList: React.FC = () => {
             />
           </Card>
         </Col>
-        <Col span={6}>
+        <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title="Valor Médio"
-              value={valorMedio}
+              title="Convênios"
+              value={totalConvenio}
               formatter={(value) => formatCurrency(Number(value))}
-              valueStyle={{ color: '#1890ff' }}
+              valueStyle={{ color: '#52c41a' }}
+              suffix={<Tag color="green">{pagamentosConvenio.length}</Tag>}
             />
           </Card>
         </Col>
-        <Col span={6}>
+        <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title="Período"
-              value={dateRange ? `${formatDate(dateRange[0])} - ${formatDate(dateRange[1])}` : 'Últimos 30 dias'}
-              prefix={<CalendarOutlined />}
+              title="Particulares"
+              value={totalParticular}
+              formatter={(value) => formatCurrency(Number(value))}
+              valueStyle={{ color: '#1890ff' }}
+              suffix={<Tag color="blue">{totalPagamentos - pagamentosConvenio.length}</Tag>}
             />
           </Card>
         </Col>

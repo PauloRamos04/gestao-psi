@@ -7,6 +7,30 @@ export interface Usuario {
   tipoId: number;
   status: boolean;
   titulo: string;
+  
+  // Contato
+  email?: string;
+  telefone?: string;
+  celular?: string;
+  
+  // Informações Pessoais
+  nomeCompleto?: string;
+  fotoUrl?: string;
+  cargo?: string;
+  departamento?: string;
+  
+  // Controle
+  ultimoAccesso?: string;
+  dataCriacao?: string;
+  dataInativacao?: string;
+  
+  // Preferências
+  temaPreferido?: string;
+  idioma?: string;
+  receberNotificacoesEmail?: boolean;
+  receberNotificacoesSistema?: boolean;
+  
+  observacoes?: string;
   clinicaNome?: string;
   psicologoNome?: string;
   tipoNome?: string;
@@ -22,9 +46,56 @@ export interface Clinica {
 
 export interface Psicologo {
   id: number;
-  psicologLogin: string;
+  psicologLogin?: string;
   nome: string;
-  dtAtivacao: string;
+  
+  // Documentos
+  cpf?: string;
+  rg?: string;
+  crp?: string;
+  
+  // Contato
+  email?: string;
+  telefone?: string;
+  celular?: string;
+  telefoneEmergencia?: string;
+  contatoEmergenciaNome?: string;
+  
+  // Dados Pessoais
+  dataNascimento?: string;
+  genero?: string;
+  estadoCivil?: string;
+  nacionalidade?: string;
+  
+  // Endereço
+  cep?: string;
+  logradouro?: string;
+  numeroEndereco?: string;
+  complemento?: string;
+  bairro?: string;
+  cidade?: string;
+  estado?: string;
+  
+  // Formação
+  formacaoAcademica?: string;
+  especializacoes?: string;
+  abordagemTerapeutica?: string;
+  areasAtuacao?: string;
+  anosExperiencia?: number;
+  universidadeFormacao?: string;
+  anoFormacao?: number;
+  
+  // Profissional
+  dtAtivacao?: string;
+  valorConsulta?: number;
+  duracaoSessaoMinutos?: number;
+  aceitaConvenio?: boolean;
+  conveniosAceitos?: string;
+  bio?: string;
+  fotoUrl?: string;
+  ativo?: boolean;
+  
+  observacoes?: string;
   categoriaId?: number;
   categoriaNome?: string;
 }
@@ -35,6 +106,66 @@ export interface Paciente {
   psicologId: number;
   nome: string;
   status: boolean;
+  
+  // Documentos
+  cpf?: string;
+  rg?: string;
+  orgaoEmissorRg?: string;
+  
+  // Dados Pessoais
+  dataNascimento?: string;
+  idade?: number;
+  genero?: string;
+  estadoCivil?: string;
+  profissao?: string;
+  escolaridade?: string;
+  nacionalidade?: string;
+  naturalDe?: string;
+  
+  // Contato
+  email?: string;
+  telefone?: string;
+  celular?: string;
+  telefoneRecado?: string;
+  contatoRecadoNome?: string;
+  
+  // Endereço
+  cep?: string;
+  logradouro?: string;
+  numeroEndereco?: string;
+  complemento?: string;
+  bairro?: string;
+  cidade?: string;
+  estado?: string;
+  
+  // Responsável (menor de idade)
+  responsavelNome?: string;
+  responsavelCpf?: string;
+  responsavelParentesco?: string;
+  responsavelTelefone?: string;
+  
+  // Informações Clínicas
+  motivoConsulta?: string;
+  queixaPrincipal?: string;
+  historicoFamiliar?: string;
+  medicamentosUso?: string;
+  alergias?: string;
+  condicoesMedicas?: string;
+  emTratamentoPsiquiatrico?: boolean;
+  psiquiatraNome?: string;
+  usoMedicacaoPsiquiatrica?: boolean;
+  
+  // Informações Adicionais
+  comoConheceu?: string;
+  convenioSaude?: string;
+  numeroCarteirinha?: string;
+  plano?: string;
+  dataPrimeiraConsulta?: string;
+  dataUltimaConsulta?: string;
+  numeroSessoesRealizadas?: number;
+  fotoUrl?: string;
+  
+  observacoes?: string;
   clinicaNome?: string;
   psicologoNome?: string;
 }
@@ -42,8 +173,23 @@ export interface Paciente {
 export interface Sala {
   id: number;
   clinicaId: number;
+  psicologoResponsavelId?: number;
   nome: string;
+  numero?: string;
+  descricao?: string;
+  capacidade?: number;
+  ativa?: boolean;
+  cor?: string;
+  andar?: number;
+  bloco?: string;
+  observacoes?: string;
+  exclusiva?: boolean;
+  permiteCompartilhamento?: boolean;
+  
+  // Informações extras
   clinicaNome?: string;
+  psicologoResponsavelNome?: string;
+  descricaoCompleta?: string;
 }
 
 export interface Sessao {
@@ -72,6 +218,13 @@ export interface Pagamento {
   data: string;
   tipoPagamentoId: number;
   observacoes?: string;
+  // Campos de Convênio
+  ehConvenio?: boolean;
+  convenio?: string;
+  numeroGuia?: string;
+  valorConvenio?: number;
+  valorCoparticipacao?: number;
+  // Nomes relacionados
   clinicaNome?: string;
   psicologoNome?: string;
   pacienteNome?: string;
@@ -100,21 +253,37 @@ export interface Notificacao {
 export interface Prontuario {
   id: number;
   pacienteId: number;
-  data: string;
-  descricao: string;
-  diagnostico?: string;
-  prescricao?: string;
-  observacoes?: string;
+  sessaoId?: number;
+  psicologoId: number;
+  dataRegistro: string;
+  tipo: 'ANAMNESE' | 'EVOLUCAO' | 'OBSERVACAO';
+  titulo?: string;
+  conteudo: string;
+  queixaPrincipal?: string;
+  objetivoTerapeutico?: string;
+  historico?: string;
+  evolucao?: string;
+  planoTerapeutico?: string;
+  privado: boolean;
+  status: boolean;
   paciente?: Paciente;
+  psicologo?: any;
+  sessao?: any;
 }
 
 export interface FormularioProntuario {
   pacienteId: number;
-  data: string;
-  descricao: string;
-  diagnostico?: string;
-  prescricao?: string;
-  observacoes?: string;
+  sessaoId?: number;
+  psicologId: number;
+  tipo: 'ANAMNESE' | 'EVOLUCAO' | 'OBSERVACAO';
+  titulo?: string;
+  conteudo: string;
+  queixaPrincipal?: string;
+  objetivoTerapeutico?: string;
+  historico?: string;
+  evolucao?: string;
+  planoTerapeutico?: string;
+  privado?: boolean;
 }
 
 export interface TipoUser {
@@ -125,6 +294,32 @@ export interface TipoUser {
 export interface Categoria {
   id: number;
   nome: string;
+}
+
+export interface LogAuditoria {
+  id: number;
+  dataHora: string;
+  usuarioId?: number;
+  username?: string;
+  acao: string;
+  entidade?: string;
+  entidadeId?: number;
+  descricao?: string;
+  dadosAnteriores?: string;
+  dadosNovos?: string;
+  ipAddress?: string;
+  userAgent?: string;
+  metodoHttp?: string;
+  endpoint?: string;
+  statusCode?: number;
+  tempoExecucaoMs?: number;
+  sucesso: boolean;
+  mensagemErro?: string;
+  clinicaId?: number;
+  psicologoId?: number;
+  modulo?: string;
+  nivel: string;
+  tags?: string;
 }
 
 export interface TipoUsuario {
@@ -199,6 +394,12 @@ export interface FormularioPagamento {
   data: string;
   tipoPagamentoId: number;
   observacoes?: string;
+  // Campos de Convênio
+  ehConvenio?: boolean;
+  convenio?: string;
+  numeroGuia?: string;
+  valorConvenio?: number;
+  valorCoparticipacao?: number;
 }
 
 export interface FormularioPaciente {

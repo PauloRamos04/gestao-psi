@@ -17,6 +17,7 @@ import {
   DownloadsPage,
   ProntuarioPage,
 } from './pages';
+import LogsPage from './pages/LogsPage';
 
 // Feature Components
 import {
@@ -255,6 +256,16 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <ProntuarioPage />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* Logs do Sistema */}
+          <Route 
+            path="/logs" 
+            element={
+              <ProtectedRoute>
+                <LogsPage />
               </ProtectedRoute>
             } 
           />

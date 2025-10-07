@@ -311,7 +311,8 @@ const UsuariosList: React.FC = () => {
           setEditingUsuario(null);
         }}
         footer={null}
-        width={600}
+        width={1000}
+        style={{ top: 20 }}
         destroyOnClose={true}
       >
         {modalVisible && (

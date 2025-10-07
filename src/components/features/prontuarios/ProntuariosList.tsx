@@ -85,27 +85,45 @@ const ProntuariosList: React.FC<ProntuariosListProps> = ({ pacienteId, pacienteN
     setModalVisible(true);
   };
 
+  const getTipoBadge = (tipo: string) => {
+    const colors: Record<string, string> = {
+      'ANAMNESE': 'blue',
+      'EVOLUCAO': 'green',
+      'OBSERVACAO': 'orange'
+    };
+    return <Tag color={colors[tipo] || 'default'}>{tipo}</Tag>;
+  };
+
   const columns = [
     {
       title: 'Data',
-      dataIndex: 'data',
-      key: 'data',
+      dataIndex: 'dataRegistro',
+      key: 'dataRegistro',
       width: 120,
-      render: (data: string) => format(new Date(data), 'dd/MM/yyyy'),
-      sorter: (a: Prontuario, b: Prontuario) => new Date(a.data).getTime() - new Date(b.data).getTime(),
+      render: (data: string) => format(new Date(data), 'dd/MM/yyyy HH:mm'),
+      sorter: (a: Prontuario, b: Prontuario) => 
+        new Date(a.dataRegistro).getTime() - new Date(b.dataRegistro).getTime(),
     },
     {
-      title: 'Descrição',
-      dataIndex: 'descricao',
-      key: 'descricao',
-      ellipsis: true,
+      title: 'Tipo',
+      dataIndex: 'tipo',
+      key: 'tipo',
+      width: 120,
+      render: (tipo: string) => getTipoBadge(tipo),
     },
     {
-      title: 'Diagnóstico',
-      dataIndex: 'diagnostico',
-      key: 'diagnostico',
+      title: 'Título',
+      dataIndex: 'titulo',
+      key: 'titulo',
       ellipsis: true,
-      render: (text: string) => text || <Text type="secondary">-</Text>,
+      render: (text: string) => text || <Text type="secondary">Sem título</Text>,
+    },
+    {
+      title: 'Conteúdo',
+      dataIndex: 'conteudo',
+      key: 'conteudo',
+      ellipsis: true,
+      render: (text: string) => text?.substring(0, 100) + (text?.length > 100 ? '...' : ''),
     },
     {
       title: 'Ações',
@@ -240,28 +258,50 @@ const ProntuariosList: React.FC<ProntuariosListProps> = ({ pacienteId, pacienteN
       >
         {selectedProntuario && (
           <div>
-            <p><strong>Data:</strong> {format(new Date(selectedProntuario.data), 'dd/MM/yyyy')}</p>
-            <p><strong>Descrição:</strong></p>
-            <p style={{ whiteSpace: 'pre-wrap' }}>{selectedProntuario.descricao}</p>
+            <p><strong>Data do Registro:</strong> {format(new Date(selectedProntuario.dataRegistro), 'dd/MM/yyyy HH:mm')}</p>
+            <p><strong>Tipo:</strong> {getTipoBadge(selectedProntuario.tipo)}</p>
             
-            {selectedProntuario.diagnostico && (
+            {selectedProntuario.titulo && (
+              <p><strong>Título:</strong> {selectedProntuario.titulo}</p>
+            )}
+            
+            <p><strong>Conteúdo:</strong></p>
+            <p style={{ whiteSpace: 'pre-wrap', background: '#f5f5f5', padding: '12px', borderRadius: '4px' }}>
+              {selectedProntuario.conteudo}
+            </p>
+            
+            {selectedProntuario.queixaPrincipal && (
               <>
-                <p><strong>Diagnóstico:</strong></p>
-                <p style={{ whiteSpace: 'pre-wrap' }}>{selectedProntuario.diagnostico}</p>
+                <p><strong>Queixa Principal:</strong></p>
+                <p style={{ whiteSpace: 'pre-wrap' }}>{selectedProntuario.queixaPrincipal}</p>
               </>
             )}
             
-            {selectedProntuario.prescricao && (
+            {selectedProntuario.objetivoTerapeutico && (
               <>
-                <p><strong>Prescrição:</strong></p>
-                <p style={{ whiteSpace: 'pre-wrap' }}>{selectedProntuario.prescricao}</p>
+                <p><strong>Objetivo Terapêutico:</strong></p>
+                <p style={{ whiteSpace: 'pre-wrap' }}>{selectedProntuario.objetivoTerapeutico}</p>
               </>
             )}
             
-            {selectedProntuario.observacoes && (
+            {selectedProntuario.historico && (
               <>
-                <p><strong>Observações:</strong></p>
-                <p style={{ whiteSpace: 'pre-wrap' }}>{selectedProntuario.observacoes}</p>
+                <p><strong>Histórico:</strong></p>
+                <p style={{ whiteSpace: 'pre-wrap' }}>{selectedProntuario.historico}</p>
+              </>
+            )}
+            
+            {selectedProntuario.evolucao && (
+              <>
+                <p><strong>Evolução:</strong></p>
+                <p style={{ whiteSpace: 'pre-wrap' }}>{selectedProntuario.evolucao}</p>
+              </>
+            )}
+            
+            {selectedProntuario.planoTerapeutico && (
+              <>
+                <p><strong>Plano Terapêutico:</strong></p>
+                <p style={{ whiteSpace: 'pre-wrap' }}>{selectedProntuario.planoTerapeutico}</p>
               </>
             )}
           </div>

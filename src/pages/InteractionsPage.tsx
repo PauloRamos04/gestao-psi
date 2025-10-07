@@ -36,6 +36,7 @@ import {
   CheckCircleOutlined
 } from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
+import apiService from '../services/api';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -94,12 +95,12 @@ const InteractionsPage: React.FC = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      // TODO: Implementar endpoints para sugestões e recomendações
-      // const suggestionsData = await apiService.getSuggestions();
-      // const recommendationsData = await apiService.getRecommendations();
-      
-      setSuggestions([]);
-      setRecommendations([]);
+      const [suggestionsData, recommendationsData] = await Promise.all([
+        apiService.getSuggestions?.(),
+        apiService.getRecommendations?.()
+      ]);
+      setSuggestions(suggestionsData || []);
+      setRecommendations(recommendationsData || []);
     } catch (error) {
       message.error('Erro ao carregar dados');
     } finally {
@@ -123,7 +124,8 @@ const InteractionsPage: React.FC = () => {
         date: format(new Date(), 'yyyy-MM-dd')
       };
       
-      setSuggestions(prev => [newSuggestion, ...prev]);
+      await apiService.createSuggestion?.(newSuggestion);
+      await loadData();
       setSuggestionModalVisible(false);
       suggestionForm.resetFields();
       message.success('Sugestão enviada com sucesso!');
@@ -143,7 +145,8 @@ const InteractionsPage: React.FC = () => {
         date: format(new Date(), 'yyyy-MM-dd')
       };
       
-      setRecommendations(prev => [newRecommendation, ...prev]);
+      await apiService.createRecommendation?.(newRecommendation);
+      await loadData();
       setRecommendationModalVisible(false);
       recommendationForm.resetFields();
       message.success('Indicação enviada com sucesso!');

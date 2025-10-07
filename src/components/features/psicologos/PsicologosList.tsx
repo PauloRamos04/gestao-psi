@@ -12,7 +12,10 @@ import {
   Typography,
   Row,
   Col,
-  Statistic
+  Statistic,
+  Form,
+  Input,
+  Select
 } from 'antd';
 import {
   UserOutlined,
@@ -20,7 +23,10 @@ import {
   EditOutlined,
   DeleteOutlined,
   ReloadOutlined,
-  TeamOutlined
+  TeamOutlined,
+  UserAddOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined
 } from '@ant-design/icons';
 import { Psicologo } from '../../../types';
 import apiService from '../../../services/api';
@@ -28,12 +34,17 @@ import PsicologosForm from './PsicologosForm';
 import { format } from 'date-fns';
 
 const { Title, Text } = Typography;
+const { Option } = Select;
 
 const PsicologosList: React.FC = () => {
   const [psicologos, setPsicologos] = useState<Psicologo[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalUsuarioVisible, setModalUsuarioVisible] = useState(false);
   const [selectedPsicologo, setSelectedPsicologo] = useState<Psicologo | null>(null);
+  const [psicologosComUsuario, setPsicologosComUsuario] = useState<Record<number, boolean>>({});
+  const [loadingUsuario, setLoadingUsuario] = useState(false);
+  const [formUsuario] = Form.useForm();
 
   useEffect(() => {
     loadPsicologos();
@@ -44,10 +55,39 @@ const PsicologosList: React.FC = () => {
       setLoading(true);
       const data = await apiService.getPsicologos();
       setPsicologos(data);
+      
+      // Verificar quais psicólogos têm usuário
+      const statusUsuarios: Record<number, boolean> = {};
+      for (const psi of data) {
+        try {
+          const temUsuario = await apiService.verificarPsicologoTemUsuario(psi.id);
+          statusUsuarios[psi.id] = temUsuario;
+        } catch {
+          statusUsuarios[psi.id] = false;
+        }
+      }
+      setPsicologosComUsuario(statusUsuarios);
     } catch (error: any) {
       message.error('Erro ao carregar psicólogos');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCriarUsuario = async (values: any) => {
+    if (!selectedPsicologo) return;
+    
+    setLoadingUsuario(true);
+    try {
+      await apiService.criarUsuarioParaPsicologo(selectedPsicologo.id, values);
+      message.success('Usuário criado com sucesso!');
+      setModalUsuarioVisible(false);
+      formUsuario.resetFields();
+      loadPsicologos();
+    } catch (error: any) {
+      message.error(error.response?.data?.message || 'Erro ao criar usuário');
+    } finally {
+      setLoadingUsuario(false);
     }
   };
 
@@ -106,11 +146,47 @@ const PsicologosList: React.FC = () => {
       render: (text: string) => <Tag color="green">{text || 'N/A'}</Tag>,
     },
     {
-      title: 'Ações',
-      key: 'actions',
+      title: 'Usuário',
+      key: 'usuario',
       width: 120,
       render: (_: any, record: Psicologo) => (
+        <div>
+          {psicologosComUsuario[record.id] ? (
+            <Tag icon={<CheckCircleOutlined />} color="success">
+              Tem Usuário
+            </Tag>
+          ) : (
+            <Tag icon={<CloseCircleOutlined />} color="warning">
+              Sem Usuário
+            </Tag>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: 'Ações',
+      key: 'actions',
+      width: 180,
+      render: (_: any, record: Psicologo) => (
         <Space>
+          {!psicologosComUsuario[record.id] && (
+            <Tooltip title="Criar Usuário">
+              <Button
+                type="primary"
+                size="small"
+                icon={<UserAddOutlined />}
+                onClick={() => {
+                  setSelectedPsicologo(record);
+                  setModalUsuarioVisible(true);
+                  formUsuario.setFieldsValue({
+                    username: record.psicologLogin || record.nome.toLowerCase().replace(/\s+/g, '.')
+                  });
+                }}
+              >
+                Criar
+              </Button>
+            </Tooltip>
+          )}
           <Tooltip title="Editar">
             <Button
               type="text"
@@ -205,7 +281,7 @@ const PsicologosList: React.FC = () => {
         />
       </Card>
 
-      {/* Modal */}
+      {/* Modal Editar/Criar Psicólogo */}
       <Modal
         title={selectedPsicologo ? 'Editar Psicólogo' : 'Novo Psicólogo'}
         open={modalVisible}
@@ -214,7 +290,8 @@ const PsicologosList: React.FC = () => {
           setSelectedPsicologo(null);
         }}
         footer={null}
-        width={600}
+        width={1000}
+        style={{ top: 20 }}
       >
         <PsicologosForm
           psicologo={selectedPsicologo}
@@ -228,6 +305,84 @@ const PsicologosList: React.FC = () => {
             setSelectedPsicologo(null);
           }}
         />
+      </Modal>
+
+      {/* Modal Criar Usuário para Psicólogo */}
+      <Modal
+        title={
+          <Space>
+            <UserAddOutlined />
+            <span>Criar Usuário para {selectedPsicologo?.nome}</span>
+          </Space>
+        }
+        open={modalUsuarioVisible}
+        onCancel={() => {
+          setModalUsuarioVisible(false);
+          setSelectedPsicologo(null);
+          formUsuario.resetFields();
+        }}
+        footer={null}
+        width={500}
+      >
+        <div style={{ 
+          padding: '12px 16px', 
+          backgroundColor: '#e6f7ff', 
+          border: '1px solid #91d5ff', 
+          borderRadius: '4px',
+          marginBottom: 24 
+        }}>
+          <p style={{ margin: 0, color: '#0050b3' }}>
+            💡 Este psicólogo ainda não possui usuário de acesso ao sistema. Preencha os dados abaixo para criar.
+          </p>
+        </div>
+
+        <Form
+          form={formUsuario}
+          layout="vertical"
+          onFinish={handleCriarUsuario}
+        >
+          <Form.Item 
+            name="username" 
+            label="Username (Login)" 
+            rules={[{ required: true, message: 'Username é obrigatório' }]}
+          >
+            <Input placeholder="Ex: joao.silva" />
+          </Form.Item>
+
+          <Form.Item 
+            name="senha" 
+            label="Senha" 
+            rules={[
+              { required: true, message: 'Senha é obrigatória' },
+              { min: 6, message: 'Senha deve ter no mínimo 6 caracteres' }
+            ]}
+          >
+            <Input.Password placeholder="Mínimo 6 caracteres" />
+          </Form.Item>
+
+          <Form.Item name="tipoUserId" label="Tipo de Usuário">
+            <Select placeholder="Deixe em branco para usar PSICOLOGO" allowClear>
+              <Option value={2}>Psicólogo</Option>
+              <Option value={1}>Admin</Option>
+              <Option value={3}>Funcionário</Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item style={{ marginTop: 24, marginBottom: 0 }}>
+            <Space>
+              <Button type="primary" htmlType="submit" loading={loadingUsuario}>
+                Criar Usuário
+              </Button>
+              <Button onClick={() => {
+                setModalUsuarioVisible(false);
+                setSelectedPsicologo(null);
+                formUsuario.resetFields();
+              }}>
+                Cancelar
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
       </Modal>
     </div>
   );

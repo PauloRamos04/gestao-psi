@@ -26,3 +26,6 @@ env.template
 .env.dev
 .env.prd
 env.production
+env
+env.dev
+env.prd

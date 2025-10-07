@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, DatePicker, Select, Button, message, Space, InputNumber } from 'antd';
+import { Form, Input, DatePicker, Select, Button, message, Space, InputNumber, Switch, Row, Col, Divider } from 'antd';
 import { Pagamento, Paciente, FormularioPagamento, TipoPagamento } from '../../../types';
 import { useAuth } from '../../../contexts/AuthContext';
 import apiService from '../../../services/api';
@@ -19,6 +19,7 @@ const PagamentosForm: React.FC<PagamentosFormProps> = ({ pagamento, onSuccess, o
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
+  const [ehConvenio, setEhConvenio] = useState(false);
 
   // Tipos de pagamento fixos (pode vir do backend depois)
   const tiposPagamento: TipoPagamento[] = [
@@ -32,12 +33,18 @@ const PagamentosForm: React.FC<PagamentosFormProps> = ({ pagamento, onSuccess, o
   useEffect(() => {
     loadPacientes();
     if (pagamento) {
+      setEhConvenio(pagamento.ehConvenio || false);
       form.setFieldsValue({
         pacienteId: pagamento.pacienteId,
         valor: pagamento.valor,
         data: dayjs(pagamento.data),
         tipoPagamentoId: pagamento.tipoPagamentoId,
-        observacoes: pagamento.observacoes || ''
+        observacoes: pagamento.observacoes || '',
+        ehConvenio: pagamento.ehConvenio || false,
+        convenio: pagamento.convenio,
+        numeroGuia: pagamento.numeroGuia,
+        valorConvenio: pagamento.valorConvenio,
+        valorCoparticipacao: pagamento.valorCoparticipacao
       });
     }
   }, [pagamento]);
@@ -65,7 +72,13 @@ const PagamentosForm: React.FC<PagamentosFormProps> = ({ pagamento, onSuccess, o
         valor: values.valor,
         data: values.data.format('YYYY-MM-DD'),
         tipoPagamentoId: values.tipoPagamentoId,
-        observacoes: values.observacoes
+        observacoes: values.observacoes,
+        // Campos de Convênio
+        ehConvenio: values.ehConvenio || false,
+        convenio: values.convenio,
+        numeroGuia: values.numeroGuia,
+        valorConvenio: values.valorConvenio,
+        valorCoparticipacao: values.valorCoparticipacao
       };
 
       if (pagamento) {
@@ -155,6 +168,88 @@ const PagamentosForm: React.FC<PagamentosFormProps> = ({ pagamento, onSuccess, o
           ))}
         </Select>
       </Form.Item>
+
+      <Divider>Convênio</Divider>
+
+      <Form.Item
+        name="ehConvenio"
+        label="Pagamento via Convênio?"
+        valuePropName="checked"
+      >
+        <Switch 
+          onChange={(checked) => setEhConvenio(checked)}
+          checkedChildren="SIM"
+          unCheckedChildren="NÃO"
+        />
+      </Form.Item>
+
+      {ehConvenio && (
+        <>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="convenio"
+                label="Nome do Convênio"
+                rules={[{ required: ehConvenio, message: 'Informe o convênio' }]}
+              >
+                <Input placeholder="Ex: Unimed, Amil, Bradesco" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="numeroGuia"
+                label="Número da Guia"
+              >
+                <Input placeholder="Número da guia/autorização" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="valorConvenio"
+                label="Valor Convênio (R$)"
+              >
+                <InputNumber
+                  style={{ width: '100%' }}
+                  placeholder="0,00"
+                  min={0}
+                  step={0.01}
+                  precision={2}
+                  prefix="R$"
+                />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="valorCoparticipacao"
+                label="Coparticipação (R$)"
+              >
+                <InputNumber
+                  style={{ width: '100%' }}
+                  placeholder="0,00"
+                  min={0}
+                  step={0.01}
+                  precision={2}
+                  prefix="R$"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <div style={{ 
+            padding: '8px 12px', 
+            backgroundColor: '#e6f7ff', 
+            border: '1px solid #91d5ff', 
+            borderRadius: '4px',
+            marginBottom: 16,
+            fontSize: '12px'
+          }}>
+            💡 <strong>Dica:</strong> Valor Total = Valor Convênio + Coparticipação
+          </div>
+        </>
+      )}
 
       <Form.Item
         name="observacoes"

@@ -30,7 +30,11 @@ const ProntuarioForm: React.FC<ProntuarioFormProps> = ({
   }, [prontuario, form]);
 
   const handleSubmit = async (values: any) => {
-    if (!user?.psicologId) return;
+    if (!user?.psicologId) {
+      message.error('Usuário não tem psicologId configurado!');
+      console.error('user:', user);
+      return;
+    }
 
     setLoading(true);
     try {
@@ -39,6 +43,8 @@ const ProntuarioForm: React.FC<ProntuarioFormProps> = ({
         psicologId: user.psicologId,
         ...values
       };
+      
+      console.log('Dados a serem enviados:', data);
 
       if (prontuario) {
         await apiService.atualizarProntuario(prontuario.id, data);
@@ -50,7 +56,9 @@ const ProntuarioForm: React.FC<ProntuarioFormProps> = ({
 
       onSuccess();
     } catch (error: any) {
-      message.error(error.response?.data?.message || 'Erro ao salvar prontuário');
+      console.error('Erro ao salvar prontuário:', error);
+      console.error('Resposta do servidor:', error.response?.data);
+      message.error(error.response?.data?.message || 'Erro ao salvar prontuário. Verifique o console.');
     } finally {
       setLoading(false);
     }
