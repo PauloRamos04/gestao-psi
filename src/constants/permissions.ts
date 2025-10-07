@@ -57,6 +57,8 @@ export const PERMISSIONS = {
       'salas',
       'prontuarios',
       'relatorios',
+      'historicos',
+      'downloads',
       'imc',
       'tempo-vida',
       'temporizador',
