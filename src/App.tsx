@@ -1,59 +1,70 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Spin } from 'antd';
 import { AuthProvider } from './contexts/AuthContext';
 
-// Layout Components
+// Layout Components (sempre carregados)
 import { ProtectedRoute, PublicRoute } from './components/layout';
 
-// Pages
-import {
-  Login,
-  Dashboard,
-  FaturamentoPage,
-  ReportsPage,
-  HistoryPage,
-  SublocationsPage,
-  InteractionsPage,
-  DownloadsPage,
-  ProntuarioPage,
-} from './pages';
-import LogsPage from './pages/LogsPage';
+// Login - sempre carregado (primeira página)
+import Login from './pages/Login';
 
-// Feature Components
-import {
-  UsuariosList,
-  PacientesList,
-  SessoesList,
-  PagamentosList,
-  ClinicasList,
-  PsicologosList,
-  SalasList,
-  MensagensList,
-  IMCCalculator,
-  LifeTimeCalculator,
-  SessionTimer,
-  ColorChooser,
-  PasswordChange,
-} from './components/features';
+// Lazy loading de todas as outras páginas
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const FaturamentoPage = lazy(() => import('./pages/FaturamentoPage'));
+const ReportsPage = lazy(() => import('./pages/ReportsPage'));
+const HistoryPage = lazy(() => import('./pages/HistoryPage'));
+const SublocationsPage = lazy(() => import('./pages/SublocationsPage'));
+const InteractionsPage = lazy(() => import('./pages/InteractionsPage'));
+const DownloadsPage = lazy(() => import('./pages/DownloadsPage'));
+const ProntuarioPage = lazy(() => import('./pages/ProntuarioPage'));
+const LogsPage = lazy(() => import('./pages/LogsPage'));
 
-// Import do calendário
-import AgendaCalendar from './components/features/agenda/AgendaCalendar';
+// Lazy loading de componentes de features
+const UsuariosList = lazy(() => import('./components/features/usuarios/UsuariosList'));
+const PacientesList = lazy(() => import('./components/features/pacientes/PacientesList'));
+const SessoesList = lazy(() => import('./components/features/sessoes/SessoesList'));
+const PagamentosList = lazy(() => import('./components/features/pagamentos/PagamentosList'));
+const ClinicasList = lazy(() => import('./components/features/clinicas/ClinicasList'));
+const PsicologosList = lazy(() => import('./components/features/psicologos/PsicologosList'));
+const SalasList = lazy(() => import('./components/features/salas/SalasList'));
+const MensagensList = lazy(() => import('./components/features/mensagens/MensagensList'));
+const IMCCalculator = lazy(() => import('./components/features/tools/IMCCalculator'));
+const LifeTimeCalculator = lazy(() => import('./components/features/tools/LifeTimeCalculator'));
+const SessionTimer = lazy(() => import('./components/features/tools/SessionTimer'));
+const ColorChooser = lazy(() => import('./components/features/tools/ColorChooser'));
+const PasswordChange = lazy(() => import('./components/features/tools/PasswordChange'));
+const AgendaCalendar = lazy(() => import('./components/features/agenda/AgendaCalendar'));
+
+// Componente de loading otimizado
+const PageLoader = () => (
+  <div style={{ 
+    display: 'flex', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    height: '100vh',
+    background: 'var(--bg)'
+  }}>
+    <Spin size="large" tip="Carregando..." />
+  </div>
+);
 
 
 const App: React.FC = () => {
   return (
     <AuthProvider>
       <Router>
-        <Routes>
-          {/* Rota pública - Login */}
-          <Route 
-            path="/login" 
-            element={
-              <PublicRoute>
-                <Login />
-              </PublicRoute>
-            } 
-          />
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            {/* Rota pública - Login */}
+            <Route 
+              path="/login" 
+              element={
+                <PublicRoute>
+                  <Login />
+                </PublicRoute>
+              } 
+            />
 
           {/* Rotas protegidas */}
           <Route 
@@ -285,7 +296,8 @@ const App: React.FC = () => {
               </div>
             } 
           />
-        </Routes>
+          </Routes>
+        </Suspense>
       </Router>
     </AuthProvider>
   );

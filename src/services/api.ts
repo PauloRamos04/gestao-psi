@@ -39,6 +39,9 @@ class ApiService {
       headers: {
         'Content-Type': 'application/json',
       },
+      timeout: 30000, // 30 segundos
+      maxContentLength: 10 * 1024 * 1024, // 10MB
+      maxBodyLength: 10 * 1024 * 1024, // 10MB
     });
 
     // Interceptor para adicionar token nas requisições

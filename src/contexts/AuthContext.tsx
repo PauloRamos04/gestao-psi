@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
 import { LoginRequest, LoginResponse } from '../types';
 import apiService from '../services/api';
 
@@ -77,14 +77,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem('user');
   };
 
-  const value: AuthContextType = {
+  const value: AuthContextType = useMemo(() => ({
     user,
     token,
     login,
     logout,
     isAuthenticated: !!token,
     loading,
-  };
+  }), [user, token, loading]);
 
   return (
     <AuthContext.Provider value={value}>
