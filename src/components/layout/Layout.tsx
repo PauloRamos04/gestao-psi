@@ -122,6 +122,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       label: <Link to="/sessoes">Sessões</Link>,
     },
     {
+      key: '/agenda',
+      menuKey: 'agenda',
+      icon: <CalendarOutlined />,
+      label: <Link to="/agenda">Agenda</Link>,
+    },
+    {
       key: '/pagamentos',
       menuKey: 'pagamentos',
       icon: <CreditCardOutlined />,

@@ -567,8 +567,47 @@ class ApiService {
     return response.data;
   }
 
+  async getDownloads() {
+    const response = await this.api.get('/downloads/listar');
+    return response.data;
+  }
+
+  async getDownloadRequests() {
+    const response = await this.api.get('/downloads/requisicoes');
+    return response.data;
+  }
+
+  async downloadFile(id: number): Promise<Blob> {
+    const response = await this.api.get(`/downloads/download/${id}`, { responseType: 'blob' });
+    return response.data;
+  }
+
   async baixarArquivoExemploCsv(): Promise<Blob> {
     const response = await this.api.get('/downloads/arquivo-exemplo', { responseType: 'blob' });
+    return response.data;
+  }
+
+  // ==================== UPLOADS ====================
+  async uploadFoto(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await this.api.post('/uploads/foto', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  }
+
+  async uploadDocumento(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await this.api.post('/uploads/documento', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  }
+
+  async deletarArquivo(tipo: string, filename: string) {
+    const response = await this.api.delete(`/uploads/${tipo}/${filename}`);
     return response.data;
   }
 }

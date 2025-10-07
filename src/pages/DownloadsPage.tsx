@@ -112,11 +112,8 @@ const DownloadsPage: React.FC = () => {
   const loadDownloads = async () => {
     setLoading(true);
     try {
-      // TODO: Implementar endpoint para buscar downloads
-      // const data = await apiService.getDownloads();
-      // setDownloads(data);
-      
-      setDownloads([]);
+      const data = await apiService.getDownloads();
+      setDownloads(data);
     } catch (error) {
       message.error('Erro ao carregar downloads');
     } finally {
@@ -126,11 +123,8 @@ const DownloadsPage: React.FC = () => {
 
   const loadDownloadRequests = async () => {
     try {
-      // TODO: Implementar endpoint para buscar requisições de download
-      // const data = await apiService.getDownloadRequests();
-      // setDownloadRequests(data);
-      
-      setDownloadRequests([]);
+      const data = await apiService.getDownloadRequests();
+      setDownloadRequests(data);
     } catch (error) {
       message.error('Erro ao carregar requisições');
     }
@@ -141,10 +135,22 @@ const DownloadsPage: React.FC = () => {
     loadDownloadRequests();
   }, []);
 
-  const handleDownload = (download: DownloadItem) => {
+  const handleDownload = async (download: DownloadItem) => {
     if (download.status === 'available') {
-      message.success(`Iniciando download de ${download.name}`);
-      // Aqui seria implementada a lógica de download real
+      try {
+        const blob = await apiService.downloadFile(download.id);
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = download.name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        message.success(`Download de ${download.name} iniciado`);
+      } catch (error) {
+        message.error('Erro ao fazer download do arquivo');
+      }
     } else if (download.status === 'generating') {
       message.info('Arquivo ainda está sendo gerado. Tente novamente em alguns minutos.');
     } else {

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Select, Button, Space, message, DatePicker, Tabs, Switch, Row, Col, InputNumber } from 'antd';
-import { UserOutlined, HomeOutlined, MedicineBoxOutlined, SafetyCertificateOutlined, HeartOutlined } from '@ant-design/icons';
+import { UserOutlined, HomeOutlined, MedicineBoxOutlined, SafetyCertificateOutlined, HeartOutlined, SearchOutlined } from '@ant-design/icons';
 import type { Paciente } from '../../../types';
 import apiService from '../../../services/api';
 import { useAuth } from '../../../contexts/AuthContext';
 import dayjs from 'dayjs';
+import { buscarCep } from '../../../utils/cep';
+import { maskCEP, maskCPF, maskPhone } from '../../../utils/masks';
 
 const { TextArea } = Input;
 const { Option} = Select;
@@ -19,6 +21,7 @@ const PacienteForm: React.FC<PacienteFormProps> = ({ paciente, onSuccess, onCanc
   const { user } = useAuth();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [buscandoCep, setBuscandoCep] = useState(false);
 
   useEffect(() => {
     if (paciente) {
@@ -29,6 +32,35 @@ const PacienteForm: React.FC<PacienteFormProps> = ({ paciente, onSuccess, onCanc
       });
     }
   }, [paciente, form]);
+
+  const handleBuscarCep = async () => {
+    const cep = form.getFieldValue('cep');
+    if (!cep) {
+      message.warning('Digite um CEP');
+      return;
+    }
+
+    setBuscandoCep(true);
+    try {
+      const data = await buscarCep(cep);
+      if (data) {
+        form.setFieldsValue({
+          logradouro: data.logradouro,
+          bairro: data.bairro,
+          cidade: data.localidade,
+          estado: data.uf,
+          complemento: data.complemento
+        });
+        message.success('CEP encontrado!');
+      } else {
+        message.error('CEP não encontrado');
+      }
+    } catch (error) {
+      message.error('Erro ao buscar CEP');
+    } finally {
+      setBuscandoCep(false);
+    }
+  };
 
   const handleSubmit = async (values: any) => {
     if (!user?.clinicaId || !user?.psicologId) {
@@ -83,7 +115,14 @@ const PacienteForm: React.FC<PacienteFormProps> = ({ paciente, onSuccess, onCanc
           <Row gutter={16}>
             <Col span={8}>
               <Form.Item name="cpf" label="CPF">
-                <Input placeholder="000.000.000-00" />
+                <Input 
+                  placeholder="000.000.000-00"
+                  maxLength={14}
+                  onChange={(e) => {
+                    const masked = maskCPF(e.target.value);
+                    form.setFieldValue('cpf', masked);
+                  }}
+                />
               </Form.Item>
             </Col>
             <Col span={8}>
@@ -161,12 +200,26 @@ const PacienteForm: React.FC<PacienteFormProps> = ({ paciente, onSuccess, onCanc
             </Col>
             <Col span={6}>
               <Form.Item name="telefone" label="Telefone">
-                <Input placeholder="(00) 0000-0000" />
+                <Input 
+                  placeholder="(00) 0000-0000"
+                  maxLength={15}
+                  onChange={(e) => {
+                    const masked = maskPhone(e.target.value);
+                    form.setFieldValue('telefone', masked);
+                  }}
+                />
               </Form.Item>
             </Col>
             <Col span={6}>
               <Form.Item name="celular" label="Celular">
-                <Input placeholder="(00) 00000-0000" />
+                <Input 
+                  placeholder="(00) 00000-0000"
+                  maxLength={15}
+                  onChange={(e) => {
+                    const masked = maskPhone(e.target.value);
+                    form.setFieldValue('celular', masked);
+                  }}
+                />
               </Form.Item>
             </Col>
           </Row>
@@ -174,7 +227,14 @@ const PacienteForm: React.FC<PacienteFormProps> = ({ paciente, onSuccess, onCanc
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item name="telefoneRecado" label="Telefone para Recado">
-                <Input placeholder="(00) 0000-0000" />
+                <Input 
+                  placeholder="(00) 0000-0000"
+                  maxLength={15}
+                  onChange={(e) => {
+                    const masked = maskPhone(e.target.value);
+                    form.setFieldValue('telefoneRecado', masked);
+                  }}
+                />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -194,7 +254,23 @@ const PacienteForm: React.FC<PacienteFormProps> = ({ paciente, onSuccess, onCanc
           <Row gutter={16}>
             <Col span={8}>
               <Form.Item name="cep" label="CEP">
-                <Input placeholder="00000-000" />
+                <Input 
+                  placeholder="00000-000" 
+                  maxLength={9}
+                  onChange={(e) => {
+                    const masked = maskCEP(e.target.value);
+                    form.setFieldValue('cep', masked);
+                  }}
+                  suffix={
+                    <Button
+                      type="text"
+                      icon={<SearchOutlined />}
+                      loading={buscandoCep}
+                      onClick={handleBuscarCep}
+                      size="small"
+                    />
+                  }
+                />
               </Form.Item>
             </Col>
             <Col span={12}>

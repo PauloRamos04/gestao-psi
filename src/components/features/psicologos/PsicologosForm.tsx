@@ -8,11 +8,14 @@ import {
   HomeOutlined,
   BookOutlined,
   BankOutlined,
-  LockOutlined
+  LockOutlined,
+  SearchOutlined
 } from '@ant-design/icons';
 import type { Psicologo, Categoria } from '../../../types';
 import apiService from '../../../services/api';
 import dayjs from 'dayjs';
+import { buscarCep } from '../../../utils/cep';
+import { maskCEP } from '../../../utils/masks';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -29,6 +32,7 @@ const PsicologosForm: React.FC<PsicologosFormProps> = ({ psicologo, onSuccess, o
   const [loadingData, setLoadingData] = useState(true);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [criarUsuario, setCriarUsuario] = useState(false);
+  const [buscandoCep, setBuscandoCep] = useState(false);
 
   useEffect(() => {
     loadCategorias();
@@ -50,6 +54,35 @@ const PsicologosForm: React.FC<PsicologosFormProps> = ({ psicologo, onSuccess, o
       message.error('Erro ao carregar categorias');
     } finally {
       setLoadingData(false);
+    }
+  };
+
+  const handleBuscarCep = async () => {
+    const cep = form.getFieldValue('cep');
+    if (!cep) {
+      message.warning('Digite um CEP');
+      return;
+    }
+
+    setBuscandoCep(true);
+    try {
+      const data = await buscarCep(cep);
+      if (data) {
+        form.setFieldsValue({
+          logradouro: data.logradouro,
+          bairro: data.bairro,
+          cidade: data.localidade,
+          estado: data.uf,
+          complemento: data.complemento
+        });
+        message.success('CEP encontrado!');
+      } else {
+        message.error('CEP não encontrado');
+      }
+    } catch (error) {
+      message.error('Erro ao buscar CEP');
+    } finally {
+      setBuscandoCep(false);
     }
   };
 
@@ -196,7 +229,23 @@ const PsicologosForm: React.FC<PsicologosFormProps> = ({ psicologo, onSuccess, o
           <Row gutter={16}>
             <Col span={6}>
               <Form.Item name="cep" label="CEP">
-                <Input placeholder="00000-000" />
+                <Input 
+                  placeholder="00000-000" 
+                  maxLength={9}
+                  onChange={(e) => {
+                    const masked = maskCEP(e.target.value);
+                    form.setFieldValue('cep', masked);
+                  }}
+                  suffix={
+                    <Button
+                      type="text"
+                      icon={<SearchOutlined />}
+                      loading={buscandoCep}
+                      onClick={handleBuscarCep}
+                      size="small"
+                    />
+                  }
+                />
               </Form.Item>
             </Col>
             <Col span={14}>
