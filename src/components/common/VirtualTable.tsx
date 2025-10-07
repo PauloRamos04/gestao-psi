@@ -6,14 +6,13 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Table } from 'antd';
 import type { TableProps } from 'antd';
-import { VariableSizeGrid as Grid } from 'react-window';
 
 interface VirtualTableProps<T> extends TableProps<T> {
   scroll?: { y?: number; x?: number };
 }
 
 function VirtualTable<T extends object>(props: VirtualTableProps<T>) {
-  const { columns, scroll } = props;
+  const { columns, scroll, ...restProps } = props;
   const [tableWidth, setTableWidth] = useState(0);
 
   const widthColumnCount = columns!.filter(({ width }) => !width).length;
@@ -28,7 +27,7 @@ function VirtualTable<T extends object>(props: VirtualTableProps<T>) {
     };
   });
 
-  const gridRef = useRef<any>();
+  const gridRef = useRef<any>(null);
   const [connectObject] = useState<any>(() => {
     const obj = {};
     Object.defineProperty(obj, 'scrollLeft', {
@@ -48,68 +47,19 @@ function VirtualTable<T extends object>(props: VirtualTableProps<T>) {
     return obj;
   });
 
-  const resetVirtualGrid = () => {
-    gridRef.current?.resetAfterIndices({
-      columnIndex: 0,
-      shouldForceUpdate: true,
-    });
-  };
-
-  useEffect(() => resetVirtualGrid, [tableWidth]);
-
-  const renderVirtualList = (rawData: readonly object[], { scrollbarSize, ref, onScroll }: any) => {
-    ref.current = connectObject;
-    const totalHeight = rawData.length * 54;
-
-    return (
-      <Grid
-        ref={gridRef}
-        className="virtual-grid"
-        columnCount={mergedColumns.length}
-        columnWidth={(index: number) => {
-          const { width } = mergedColumns[index];
-          return totalHeight > (scroll?.y as number) && index === mergedColumns.length - 1
-            ? (width as number) - scrollbarSize - 1
-            : (width as number);
-        }}
-        height={scroll!.y as number}
-        rowCount={rawData.length}
-        rowHeight={() => 54}
-        width={tableWidth}
-        onScroll={({ scrollLeft }: { scrollLeft: number }) => {
-          onScroll({ scrollLeft });
-        }}
-      >
-        {({
-          columnIndex,
-          rowIndex,
-          style,
-        }: {
-          columnIndex: number;
-          rowIndex: number;
-          style: React.CSSProperties;
-        }) => (
-          <div
-            className={`virtual-table-cell ${
-              columnIndex === mergedColumns.length - 1 ? 'virtual-table-cell-last' : ''
-            }`}
-            style={style}
-          >
-            {(rawData[rowIndex] as any)[(mergedColumns as any)[columnIndex].dataIndex]}
-          </div>
-        )}
-      </Grid>
-    );
-  };
-
+  // Versão simplificada sem react-window - usa apenas paginação otimizada
   return (
     <Table
-      {...props}
+      {...restProps}
       className="virtual-table"
       columns={mergedColumns}
-      pagination={false}
-      components={{
-        body: renderVirtualList,
+      scroll={scroll}
+      pagination={{
+        pageSize: 50,
+        showSizeChanger: true,
+        showQuickJumper: true,
+        pageSizeOptions: ['25', '50', '100', '200'],
+        showTotal: (total, range) => `${range[0]}-${range[1]} de ${total} itens`,
       }}
     />
   );
