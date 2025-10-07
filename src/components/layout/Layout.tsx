@@ -128,12 +128,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       label: <Link to="/pagamentos">Pagamentos</Link>,
     },
     {
-      key: '/mensagens',
-      menuKey: 'mensagens',
-      icon: <MessageOutlined />,
-      label: <Link to="/mensagens">Mensagens</Link>,
-    },
-    {
       key: '/salas',
       menuKey: 'salas',
       icon: <EnvironmentOutlined />,
@@ -202,6 +196,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       menuKey: 'downloads',
       icon: <DownloadOutlined />,
       label: <Link to="/downloads">Downloads</Link>,
+    },
+    {
+      key: '/mensagens',
+      menuKey: 'mensagens',
+      icon: <MessageOutlined />,
+      label: <Link to="/mensagens">Mensagens</Link>,
     },
     {
       key: '/logs',
