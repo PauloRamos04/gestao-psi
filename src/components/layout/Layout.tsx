@@ -326,7 +326,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             alignItems: 'center',
             justifyContent: collapsed ? 'center' : 'flex-start',
             borderBottom: '1px solid var(--border)',
-            backgroundColor: '#1890ff',
+            backgroundColor: 'var(--primary)',
             flexShrink: 0
           }}>
             <img

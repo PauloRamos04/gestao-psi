@@ -13,7 +13,8 @@ import {
   Col,
   Statistic,
   Tooltip,
-  Modal
+  Modal,
+  Result
 } from 'antd';
 import {
   FileTextOutlined,
@@ -23,10 +24,12 @@ import {
   WarningOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
-  EyeOutlined
+  EyeOutlined,
+  LockOutlined
 } from '@ant-design/icons';
 import { format } from 'date-fns';
 import apiService from '../services/api';
+import { usePermissions } from '../hooks/usePermissions';
 import type { LogAuditoria } from '../types';
 
 const { Title, Text } = Typography;
@@ -34,6 +37,7 @@ const { RangePicker } = DatePicker;
 const { Option } = Select;
 
 const LogsPage: React.FC = () => {
+  const { isAdmin } = usePermissions();
   const [logs, setLogs] = useState<LogAuditoria[]>([]);
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
@@ -189,6 +193,25 @@ const LogsPage: React.FC = () => {
       ),
     },
   ];
+
+  // Verificar se o usuário é admin
+  if (!isAdmin()) {
+    return (
+      <div style={{ padding: '24px' }}>
+        <Result
+          status="403"
+          title="Acesso Negado"
+          subTitle="Apenas administradores podem acessar os logs do sistema."
+          icon={<LockOutlined />}
+          extra={
+            <Button type="primary" onClick={() => window.history.back()}>
+              Voltar
+            </Button>
+          }
+        />
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: '24px' }}>

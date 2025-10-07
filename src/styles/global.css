@@ -182,6 +182,78 @@ code {
   color: var(--primary) !important;
 }
 
+/* Botões específicos - Segmented, Button Groups */
+.ant-segmented {
+  background: var(--surface-2) !important;
+  border: 1px solid var(--border) !important;
+}
+.ant-segmented-item {
+  color: var(--text) !important;
+  background: transparent !important;
+}
+.ant-segmented-item:not(.ant-segmented-item-selected) {
+  background: var(--surface) !important;
+}
+.ant-segmented-item-selected {
+  background: var(--primary) !important;
+  color: #fff !important;
+}
+.ant-segmented-item:hover {
+  color: var(--primary) !important;
+}
+
+/* Força absoluta para segmented buttons */
+.ant-segmented .ant-segmented-item,
+.ant-segmented-item-label {
+  color: var(--text) !important;
+  background: transparent !important;
+}
+.ant-segmented .ant-segmented-item-selected,
+.ant-segmented-item-selected .ant-segmented-item-label {
+  background: var(--primary) !important;
+  color: #fff !important;
+}
+
+/* Button Groups */
+.ant-btn-group .ant-btn {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+.ant-btn-group .ant-btn:hover {
+  background: var(--surface-2) !important;
+  color: var(--primary) !important;
+  border-color: var(--primary) !important;
+}
+.ant-btn-group .ant-btn:first-child {
+  border-top-left-radius: 8px !important;
+  border-bottom-left-radius: 8px !important;
+}
+.ant-btn-group .ant-btn:last-child {
+  border-top-right-radius: 8px !important;
+  border-bottom-right-radius: 8px !important;
+}
+
+/* Radio Button Group (Hoje/Período) */
+.ant-radio-button-wrapper {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+.ant-radio-button-wrapper:hover {
+  color: var(--primary) !important;
+}
+.ant-radio-button-wrapper-checked,
+.ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+  background: var(--primary) !important;
+  color: #fff !important;
+  border-color: var(--primary) !important;
+}
+.ant-radio-button-wrapper-checked::before { background-color: var(--primary) !important; }
+.ant-radio-button-wrapper:focus-within { box-shadow: 0 0 0 2px rgba(102,126,234,0.2) !important; }
+.ant-radio-button-wrapper:first-child { border-top-left-radius: 8px !important; border-bottom-left-radius: 8px !important; }
+.ant-radio-button-wrapper:last-child { border-top-right-radius: 8px !important; border-bottom-right-radius: 8px !important; }
+
 /* Inputs e Selects */
 .ant-input,
 .ant-input-affix-wrapper,
@@ -200,6 +272,108 @@ code {
 }
 .ant-input-number-handler-wrap { background: var(--surface-2) !important; }
 .ant-picker-input > input::placeholder { color: var(--text-secondary) !important; }
+
+/* Input addon (ex.: R$) */
+.ant-input-group-addon,
+.ant-input-number-group-addon {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+.ant-input-group-addon:first-child { border-right: 0 !important; }
+.ant-input-group-addon:last-child { border-left: 0 !important; }
+.ant-input-group .ant-input,
+.ant-input-number-group-wrapper .ant-input-number {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+/* InputNumber handlers consistency */
+.ant-input-number-handler-wrap { 
+  background: var(--surface) !important; 
+  border-color: var(--border) !important; 
+}
+.ant-input-number-handler { 
+  border-color: var(--border) !important; 
+}
+.ant-input-number-handler-up-inner, 
+.ant-input-number-handler-down-inner { 
+  color: var(--text-secondary) !important; 
+}
+
+/* Force InputNumber prefix consistency - ULTRA específico */
+.ant-input-number {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+.ant-input-number-input {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+.ant-input-number-prefix {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+.ant-input-number-group-addon {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+.ant-input-number-group-wrapper .ant-input-number-group-addon {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+/* Força absoluta para o prefixo R$ */
+.ant-input-number .ant-input-number-prefix,
+.ant-input-number-prefix,
+.ant-input-number-group-addon:first-child,
+.ant-input-number-group-addon:last-child,
+.ant-input-number-group-addon {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+/* Override inline styles se necessário */
+.ant-input-number[style*="background"] {
+  background: var(--surface) !important;
+}
+.ant-input-number-prefix[style*="background"] {
+  background: var(--surface) !important;
+}
+
+/* Radio buttons */
+.ant-radio-wrapper { color: var(--text) !important; }
+.ant-radio-inner { background: var(--surface) !important; border-color: var(--border) !important; }
+.ant-radio-checked .ant-radio-inner { background: var(--primary) !important; border-color: var(--primary) !important; }
+.ant-radio-checked .ant-radio-inner::after { background: #fff !important; }
+
+/* Textarea */
+.ant-input[type="textarea"], .ant-input-textarea {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+.ant-input-textarea::placeholder { color: var(--text-secondary) !important; }
+
+/* DatePicker / Calendar details */
+.ant-picker-panel-container, .ant-picker-panel { background: var(--surface) !important; color: var(--text) !important; }
+.ant-picker-header { background: var(--surface) !important; color: var(--text) !important; border-bottom: 1px solid var(--border) !important; }
+.ant-picker-header button { color: var(--text) !important; }
+.ant-picker-content th { color: var(--text-secondary) !important; }
+.ant-picker-content td { border-color: var(--border) !important; }
+.ant-picker-cell-inner { color: var(--text) !important; }
+.ant-picker-cell-in-view.ant-picker-cell-selected .ant-picker-cell-inner,
+.ant-picker-cell-in-view.ant-picker-cell-range-start .ant-picker-cell-inner,
+.ant-picker-cell-in-view.ant-picker-cell-range-end .ant-picker-cell-inner { background: var(--primary) !important; color: #fff !important; }
+.ant-picker-cell-in-view.ant-picker-cell-today .ant-picker-cell-inner::before { border-color: var(--primary) !important; }
+.ant-picker-footer { border-top: 1px solid var(--border) !important; background: var(--surface) !important; }
+.ant-picker-today-btn { color: var(--primary) !important; }
 
 
 /* Cards */
@@ -255,6 +429,78 @@ code {
   background: rgba(255,255,255,0.04) !important;
 }
 
+/* Ícones em tabelas e botões */
+.ant-table .anticon,
+.ant-btn .anticon,
+.anticon-edit,
+.anticon-delete,
+.anticon-eye,
+.anticon-plus,
+.anticon-search,
+.anticon-close,
+.anticon-check,
+.anticon-arrow-left,
+.anticon-arrow-right,
+.anticon-arrow-up,
+.anticon-arrow-down,
+.anticon-calendar,
+.anticon-down,
+.anticon-up,
+.anticon-user,
+.anticon-team,
+.anticon-filter {
+  color: var(--text) !important;
+}
+.ant-table .anticon:hover,
+.ant-btn .anticon:hover {
+  color: var(--primary) !important;
+}
+
+/* Avatars e ícones de estatísticas */
+.ant-avatar {
+  background: var(--surface-2) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+}
+.ant-statistic .ant-statistic-content,
+.ant-statistic .ant-statistic-content-value {
+  color: var(--primary) !important;
+}
+.ant-statistic .ant-statistic-content-prefix {
+  color: var(--primary) !important;
+}
+
+/* Ícones específicos de estatísticas */
+.ant-statistic .anticon,
+.ant-statistic .ant-statistic-content-prefix .anticon {
+  color: var(--primary) !important;
+}
+
+/* Cards de estatísticas */
+.ant-card .ant-statistic .ant-statistic-content-value {
+  color: var(--primary) !important;
+}
+.ant-card .ant-statistic .ant-statistic-content-prefix {
+  color: var(--primary) !important;
+}
+.ant-card .ant-statistic .anticon {
+  color: var(--primary) !important;
+}
+
+/* Ícones específicos em inputs */
+.ant-picker .anticon,
+.ant-select .anticon,
+.ant-input-number .anticon,
+.ant-input-affix-wrapper .anticon {
+  color: var(--text-secondary) !important;
+}
+.ant-picker .anticon:hover,
+.ant-select .anticon:hover,
+.ant-input-number .anticon:hover,
+.ant-input-affix-wrapper .anticon:hover {
+  color: var(--primary) !important;
+}
+
 /* Ant Layout */
 .ant-layout,
 .ant-layout-content {
@@ -296,6 +542,106 @@ code {
 }
 .ant-dropdown-menu-item:hover {
   background: rgba(255,255,255,0.06) !important;
+}
+
+/* Modal refinements (header/body/footer/title/buttons) */
+.ant-modal-header {
+  background: var(--surface) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+.ant-modal-title { color: var(--text) !important; }
+.ant-modal-body { background: var(--surface) !important; color: var(--text) !important; }
+.ant-modal-footer {
+  background: var(--surface) !important;
+  border-top: 1px solid var(--border) !important;
+}
+.ant-modal-close, .ant-modal-close-x { color: var(--text) !important; }
+
+/* Form controls inside modal */
+.ant-form-item-label > label { color: var(--text) !important; }
+.ant-input, .ant-input-affix-wrapper, .ant-input-password, .ant-picker,
+.ant-select-selector, .ant-input-number, .ant-input-number-input {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+.ant-input-password-icon, .anticon-eye, .anticon-eye-invisible { color: var(--text-secondary) !important; }
+.ant-input:hover, .ant-input-affix-wrapper:hover, .ant-picker:hover, .ant-select-selector:hover, .ant-input-number:hover {
+  border-color: var(--primary) !important;
+}
+
+/* Force all input states to use dark theme */
+.ant-input:focus, .ant-input-focused,
+.ant-input-affix-wrapper:focus, .ant-input-affix-wrapper-focused,
+.ant-picker:focus, .ant-picker-focused,
+.ant-select-focused .ant-select-selector,
+.ant-input-number:focus, .ant-input-number-focused {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2) !important;
+}
+
+/* Força texto do InputNumber em todos os estados */
+.ant-input-number input,
+.ant-input-number-input,
+.ant-input-number .ant-input-number-input {
+  color: var(--text) !important;
+}
+.ant-input-number input::placeholder,
+.ant-input-number-input::placeholder {
+  color: var(--text-secondary) !important;
+}
+
+/* Tabs inside modal */
+.ant-tabs-nav, .ant-tabs-content-holder { border-color: var(--border) !important; }
+.ant-tabs-tab-btn { color: var(--text) !important; }
+.ant-tabs-tab:hover .ant-tabs-tab-btn { color: var(--primary) !important; }
+.ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn { color: var(--primary) !important; }
+.ant-tabs-content-holder { background: var(--surface) !important; }
+.ant-tabs-tab { background: var(--surface-2) !important; }
+.ant-tabs-tab-active { background: var(--surface) !important; }
+
+/* Tabs horizontais (Histórico) */
+.ant-tabs-top .ant-tabs-nav {
+  background: var(--surface) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+.ant-tabs-top .ant-tabs-tab {
+  background: transparent !important;
+  color: var(--text) !important;
+  border: none !important;
+}
+.ant-tabs-top .ant-tabs-tab:hover {
+  color: var(--primary) !important;
+}
+.ant-tabs-top .ant-tabs-tab-active {
+  background: transparent !important;
+  color: var(--primary) !important;
+}
+.ant-tabs-top .ant-tabs-ink-bar {
+  background: var(--primary) !important;
+}
+.ant-tabs-top .ant-tabs-content-holder {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+}
+
+/* Select dropdown options */
+.ant-select-dropdown { box-shadow: 0 6px 16px rgba(0,0,0,0.24) !important; border: 1px solid var(--border) !important; }
+.ant-select-item,
+.ant-select-item-option,
+.ant-select-item-option-content { background: var(--surface) !important; color: var(--text) !important; }
+.ant-select-item-option-active { background: rgba(255,255,255,0.06) !important; }
+.ant-select-item-option-selected { background: rgba(102,126,234,0.15) !important; color: var(--primary) !important; }
+.ant-select-selection-search-input { color: var(--text) !important; }
+.ant-select-selection-placeholder { color: var(--text-secondary) !important; }
+
+/* Disabled states */
+.ant-input[disabled], .ant-select-disabled .ant-select-selector, .ant-picker-disabled,
+.ant-input-number-disabled, .ant-input-affix-wrapper-disabled {
+  background: var(--surface-2) !important;
+  color: var(--text-secondary) !important;
 }
 .ant-popover-arrow, .ant-tooltip-arrow, .ant-dropdown-arrow {
   border-color: var(--surface) !important;

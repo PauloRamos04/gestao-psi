@@ -427,13 +427,12 @@ const SublocationsPage: React.FC = () => {
                 </Col>
                 <Col span={12}>
                   <Form.Item
-                    label="Valor Mensal"
+                    label="Valor Mensal (R$)"
                     name="monthlyRate"
                     rules={[{ required: true, message: 'Por favor, insira o valor mensal!' }]}
                   >
                     <InputNumber
                       placeholder="0.00"
-                      prefix="R$ "
                       style={{ width: '100%' }}
                       min={0}
                       step={0.01}

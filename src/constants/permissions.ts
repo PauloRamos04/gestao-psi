@@ -57,7 +57,6 @@ export const PERMISSIONS = {
       'salas',
       'prontuarios',
       'relatorios',
-      'logs',
       'imc',
       'tempo-vida',
       'temporizador',
