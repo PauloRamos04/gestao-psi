@@ -274,8 +274,18 @@ class ApiService {
     return response.data;
   }
 
-  async trocarSenha(data: { currentPassword: string; newPassword: string }): Promise<void> {
+  async trocarSenha(data: { username: string; currentPassword: string; newPassword: string }): Promise<void> {
     await this.api.post('/auth/change-password', data);
+  }
+
+  async atualizarMeuPerfil(data: any): Promise<any> {
+    const response = await this.api.put('/usuarios/me/profile', data);
+    return response.data;
+  }
+
+  async atualizarMinhasPreferencias(data: any): Promise<any> {
+    const response = await this.api.put('/usuarios/me/preferences', data);
+    return response.data;
   }
 
   // ==================== CLÍNICAS ====================
@@ -608,6 +618,42 @@ class ApiService {
 
   async deletarArquivo(tipo: string, filename: string) {
     const response = await this.api.delete(`/uploads/${tipo}/${filename}`);
+    return response.data;
+  }
+
+  // ==================== CONFIGURAÇÕES DO SISTEMA ====================
+  async getSystemConfig() {
+    const response = await this.api.get('/system-config');
+    return response.data;
+  }
+
+  async updateSystemConfig(data: any) {
+    const response = await this.api.put('/system-config/system', data);
+    return response.data;
+  }
+
+  async updateEmailConfig(data: any) {
+    const response = await this.api.put('/system-config/email', data);
+    return response.data;
+  }
+
+  async updateSecurityConfig(data: any) {
+    const response = await this.api.put('/system-config/security', data);
+    return response.data;
+  }
+
+  async updateNotificationConfig(data: any) {
+    const response = await this.api.put('/system-config/notifications', data);
+    return response.data;
+  }
+
+  async testEmailConnection() {
+    const response = await this.api.post('/system-config/email/test');
+    return response.data;
+  }
+
+  async initializeSystemConfig() {
+    const response = await this.api.post('/system-config/initialize');
     return response.data;
   }
 }

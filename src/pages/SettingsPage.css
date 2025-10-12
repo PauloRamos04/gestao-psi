@@ -1,0 +1,50 @@
+/* Estilo personalizado para as abas do SettingsPage */
+.settings-tabs .ant-tabs-tab {
+  border-radius: 8px 8px 0 0 !important;
+  border-bottom: 1px solid transparent !important;
+}
+
+.settings-tabs .ant-tabs-tab-active {
+  border-bottom: 1px solid #1890ff !important;
+}
+
+.settings-tabs .ant-tabs-tab:hover {
+  border-radius: 8px 8px 0 0 !important;
+}
+
+/* Garantir que as abas tenham bordas arredondadas */
+.settings-tabs .ant-tabs-nav .ant-tabs-tab {
+  border-radius: 8px 8px 0 0 !important;
+  margin-right: 4px !important;
+}
+
+.settings-tabs .ant-tabs-nav .ant-tabs-tab-active {
+  background-color: #fff !important;
+  border-color: #d9d9d9 #d9d9d9 #fff !important;
+}
+
+.settings-tabs .ant-tabs-content-holder {
+  border: 1px solid #d9d9d9;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  background: #fff;
+}
+
+/* Melhorar o visual do card de preferências */
+.preferences-card .ant-card-body {
+  padding: 32px !important;
+}
+
+/* Estilo para os switches de notificação */
+.notification-switch .ant-switch-checked {
+  background-color: #52c41a !important;
+}
+
+/* Estilo para o botão de salvar */
+.save-preferences-btn {
+  height: 48px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  margin-top: 24px !important;
+}

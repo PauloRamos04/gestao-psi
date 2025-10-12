@@ -19,6 +19,9 @@ const InteractionsPage = lazy(() => import('./pages/InteractionsPage'));
 const DownloadsPage = lazy(() => import('./pages/DownloadsPage'));
 const ProntuarioPage = lazy(() => import('./pages/ProntuarioPage'));
 const LogsPage = lazy(() => import('./pages/LogsPage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const SystemSettingsPage = lazy(() => import('./pages/SystemSettingsPage'));
 
 // Lazy loading de componentes de features
 const UsuariosList = lazy(() => import('./components/features/usuarios/UsuariosList'));
@@ -277,6 +280,25 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <LogsPage />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* Configurações e Perfil */}
+          <Route 
+            path="/configuracoes" 
+            element={
+              <ProtectedRoute>
+                <SystemSettingsPage />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route 
+            path="/perfil" 
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
               </ProtectedRoute>
             } 
           />

@@ -120,6 +120,7 @@ const PasswordChange: React.FC = () => {
     
     try {
       await apiService.trocarSenha({
+        username: user?.username || '',
         currentPassword: values.currentPassword,
         newPassword: values.newPassword
       });
@@ -131,8 +132,8 @@ const PasswordChange: React.FC = () => {
         feedback: [],
         color: '#ff4d4f'
       });
-    } catch (error) {
-      message.error('Erro ao alterar senha. Verifique os dados e tente novamente.');
+    } catch (error: any) {
+      message.error(error.response?.data?.message || error.response?.data || 'Erro ao alterar senha. Verifique os dados e tente novamente.');
     } finally {
       setLoading(false);
     }

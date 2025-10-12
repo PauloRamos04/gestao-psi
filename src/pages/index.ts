@@ -12,4 +12,7 @@ export { default as DownloadsPage } from './DownloadsPage';
 export { default as SublocationsPage } from './SublocationsPage';
 export { default as InteractionsPage } from './InteractionsPage';
 export { default as ProntuarioPage } from './ProntuarioPage';
+export { default as SettingsPage } from './SettingsPage';
+export { default as ProfilePage } from './ProfilePage';
+export { default as SystemSettingsPage } from './SystemSettingsPage';
 

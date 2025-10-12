@@ -226,12 +226,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     {
       key: 'profile',
       icon: <UserOutlined />,
-      label: 'Perfil',
+      label: <Link to="/perfil">Perfil</Link>,
     },
     {
       key: 'settings',
       icon: <SettingOutlined />,
-      label: 'Configurações',
+      label: <Link to="/configuracoes">Configurações</Link>,
     },
     {
       type: 'divider' as const,
