@@ -73,28 +73,21 @@ const PermissionsManagement: React.FC = () => {
   const loadRoles = async () => {
     try {
       setLoadingRoles(true);
-      console.log('🔄 Carregando roles do backend...');
       
       const response = await api.get('/api/roles');
-      console.log('📊 Roles carregadas do backend:', response.data);
       
       // Sempre tentar carregar permissões individualmente para garantir que estejam atualizadas
       const rolesComPermissoes = await Promise.all(
         response.data.map(async (role: Role) => {
-          console.log(`🔍 Carregando permissões para role: ${role.nome} (ID: ${role.id})`);
           try {
             const roleResponse = await api.get(`/api/roles/${role.id}`);
-            const roleComPermissoes = roleResponse.data;
-            console.log(`✅ Role ${role.nome}: ${roleComPermissoes.permissions?.length || 0} permissões carregadas`);
-            return roleComPermissoes;
+            return roleResponse.data;
           } catch (error) {
-            console.error(`❌ Erro ao carregar permissões para ${role.nome}:`, error);
             return role;
           }
         })
       );
       
-      console.log('📋 Roles finais com permissões:', rolesComPermissoes);
       setRoles(rolesComPermissoes);
       
       // Sincroniza com localStorage para o formulário de usuários
@@ -102,8 +95,6 @@ const PermissionsManagement: React.FC = () => {
       
     } catch (error) {
       message.error('Erro ao carregar roles');
-      console.error('❌ Erro ao carregar roles:', error);
-      
       setRoles([]);
     } finally {
       setLoadingRoles(false);
@@ -267,12 +258,9 @@ const PermissionsManagement: React.FC = () => {
     try {
       message.loading('Atribuindo permissões às roles...', 0);
       
-      console.log('🚀 Iniciando atribuição forçada de permissões...');
-      
       // Buscar todas as permissões
       const permissionsResponse = await api.get('/api/permissions');
       const allPermissions = permissionsResponse.data;
-      console.log('📊 Total de permissões encontradas:', allPermissions.length);
       
       // Atualizar roles localmente com permissões simuladas
       const updatedRoles = roles.map(role => {
@@ -302,8 +290,6 @@ const PermissionsManagement: React.FC = () => {
             break;
         }
         
-        console.log(`✅ Role ${role.nome}: ${permissionsToAssign.length} permissões atribuídas`);
-        
         return {
           ...role,
           permissions: permissionsToAssign
@@ -319,18 +305,9 @@ const PermissionsManagement: React.FC = () => {
       message.destroy();
       message.success(`Permissões atribuídas com sucesso! ${allPermissions.length} permissões processadas.`);
       
-      // Verificar se as permissões foram aplicadas
-      setTimeout(() => {
-        console.log('🔍 Verificação final das roles:');
-        updatedRoles.forEach(role => {
-          console.log(`   ${role.nome}: ${role.permissions?.length || 0} permissões`);
-        });
-      }, 500);
-      
     } catch (error) {
       message.destroy();
       message.error('Erro ao atribuir permissões');
-      console.error('❌ Erro completo:', error);
     }
   };
 
@@ -408,10 +385,7 @@ const PermissionsManagement: React.FC = () => {
               type="primary"
               icon={<KeyOutlined style={{ color: 'white !important' }} />}
               size="small"
-              onClick={() => {
-                console.log('Clicou em Gerenciar Permissões para:', record.nome);
-                openTransferModal(record);
-              }}
+              onClick={() => openTransferModal(record)}
               style={{ 
                 backgroundColor: '#1890ff !important',
                 color: 'white !important',
@@ -426,10 +400,7 @@ const PermissionsManagement: React.FC = () => {
               type="primary"
               icon={<EditOutlined style={{ color: 'white !important' }} />}
               size="small"
-              onClick={() => {
-                console.log('Clicou em Editar para:', record.nome);
-                openRoleModal(record);
-              }}
+              onClick={() => openRoleModal(record)}
               style={{ 
                 backgroundColor: '#1890ff !important',
                 color: 'white !important',
@@ -442,10 +413,7 @@ const PermissionsManagement: React.FC = () => {
           <Tooltip title={record.ativo ? 'Desativar' : 'Ativar'}>
             <Popconfirm
               title={`${record.ativo ? 'Desativar' : 'Ativar'} esta role?`}
-              onConfirm={() => {
-                console.log('Clicou em Ativar/Desativar para:', record.nome);
-                toggleRoleStatus(record.id);
-              }}
+              onConfirm={() => toggleRoleStatus(record.id)}
             >
               <Button
                 type="primary"
@@ -464,10 +432,7 @@ const PermissionsManagement: React.FC = () => {
           <Tooltip title="Deletar">
             <Popconfirm
               title="Deletar esta role?"
-              onConfirm={() => {
-                console.log('Clicou em Deletar para:', record.nome);
-                deleteRole(record.id);
-              }}
+              onConfirm={() => deleteRole(record.id)}
             >
               <Button
                 type="primary"
@@ -532,10 +497,7 @@ const PermissionsManagement: React.FC = () => {
               type="primary"
               icon={<EditOutlined style={{ color: 'white !important' }} />}
               size="small"
-              onClick={() => {
-                console.log('Clicou em Editar Permissão para:', record.nome);
-                openPermissionModal(record);
-              }}
+              onClick={() => openPermissionModal(record)}
               style={{ 
                 backgroundColor: '#1890ff !important',
                 color: 'white !important',

@@ -181,7 +181,6 @@ export class PermissionService {
       `Role "${name}" criada`
     );
     
-    console.log(`👥 Nova role criada: ${name}`);
     return role;
   }
   
@@ -212,7 +211,6 @@ export class PermissionService {
       `Role "${oldRole.name}" atualizada`
     );
     
-    console.log(`👥 Role atualizada: ${this.roles[roleIndex].name}`);
     return true;
   }
   
@@ -247,7 +245,6 @@ export class PermissionService {
       `Role "${role.name}" removida`
     );
     
-    console.log(`👥 Role removida: ${role.name}`);
     return true;
   }
   
@@ -287,7 +284,6 @@ export class PermissionService {
       );
     });
     
-    console.log(`👤 Roles atribuídas ao usuário ${username}: ${newRoles.join(', ')}`);
   }
   
   /**
@@ -317,7 +313,6 @@ export class PermissionService {
       }
     });
     
-    console.log(`👤 Roles removidas do usuário ${username}: ${roles.join(', ')}`);
   }
   
   /**
@@ -434,7 +429,6 @@ export class PermissionService {
     this.assignRolesToUser('user3', 'secretaria1', ['secretary'], 'system');
     this.assignRolesToUser('user4', 'visualizador1', ['viewer'], 'system');
     
-    console.log('🌱 Dados de demonstração de permissões criados');
   }
   
   /**
@@ -443,6 +437,5 @@ export class PermissionService {
   static clearAllData(): void {
     this.userPermissions = [];
     this.auditLog = [];
-    console.log('👥 Dados de permissões limpos');
   }
 }

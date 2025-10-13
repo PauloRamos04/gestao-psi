@@ -167,8 +167,6 @@ export class ConfigEffects {
     
     if (intervalMs > 0) {
       const backupInterval = setInterval(() => {
-        console.log(`🔄 Backup automático executado - ${new Date().toLocaleString()}`);
-        
         // Simula download de backup
         const backupData = {
           timestamp: new Date().toISOString(),
@@ -188,7 +186,6 @@ export class ConfigEffects {
       }, intervalMs);
       
       (window as any).backupInterval = backupInterval;
-      console.log(`📅 Backup automático agendado: ${frequency}`);
     }
   }
   

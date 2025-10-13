@@ -67,7 +67,6 @@ const UsuariosForm: React.FC<UsuariosFormProps> = ({ usuario, onSuccess, onCance
     try {
       // Carrega roles do backend
       const backendRoles = await apiService.getRoles();
-      console.log('Roles carregadas do backend:', backendRoles);
       return backendRoles;
     } catch (error) {
       console.warn('Erro ao carregar roles do backend:', error);
@@ -76,7 +75,6 @@ const UsuariosForm: React.FC<UsuariosFormProps> = ({ usuario, onSuccess, onCance
         const savedRoles = localStorage.getItem('app-roles');
         if (savedRoles) {
           const parsedRoles = JSON.parse(savedRoles);
-          console.log('Roles carregadas do localStorage (fallback):', parsedRoles);
           return parsedRoles;
         }
       } catch (localError) {
