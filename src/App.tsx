@@ -22,6 +22,8 @@ const LogsPage = lazy(() => import('./pages/LogsPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const SystemSettingsPage = lazy(() => import('./pages/SystemSettingsPage'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 
 // Lazy loading de componentes de features
 const UsuariosList = lazy(() => import('./components/features/usuarios/UsuariosList'));
@@ -59,12 +61,30 @@ const App: React.FC = () => {
       <Router>
         <Suspense fallback={<PageLoader />}>
           <Routes>
-            {/* Rota pública - Login */}
+            {/* Rotas públicas */}
             <Route 
               path="/login" 
               element={
                 <PublicRoute>
                   <Login />
+                </PublicRoute>
+              } 
+            />
+
+            <Route 
+              path="/forgot-password" 
+              element={
+                <PublicRoute>
+                  <ForgotPassword />
+                </PublicRoute>
+              } 
+            />
+
+            <Route 
+              path="/reset-password" 
+              element={
+                <PublicRoute>
+                  <ResetPassword />
                 </PublicRoute>
               } 
             />
@@ -288,7 +308,7 @@ const App: React.FC = () => {
           <Route 
             path="/configuracoes" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredRole="ADMIN">
                 <SystemSettingsPage />
               </ProtectedRoute>
             } 

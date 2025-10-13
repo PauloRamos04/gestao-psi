@@ -228,11 +228,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       icon: <UserOutlined />,
       label: <Link to="/perfil">Perfil</Link>,
     },
-    {
+    // Configurações do Sistema - apenas para ADMIN
+    ...(user?.role === 'ADMIN' ? [{
       key: 'settings',
       icon: <SettingOutlined />,
-      label: <Link to="/configuracoes">Configurações</Link>,
-    },
+      label: <Link to="/configuracoes">Configurações do Sistema</Link>,
+    }] : []),
     {
       type: 'divider' as const,
     },

@@ -363,6 +363,12 @@ class ApiService {
     return response.data;
   }
 
+  // ==================== ROLES ====================
+  async getRoles(): Promise<any[]> {
+    const response: AxiosResponse<any[]> = await this.api.get('/roles/active');
+    return response.data;
+  }
+
   // ==================== PRONTUÁRIOS ====================
   async getProntuariosPorPaciente(pacienteId: number): Promise<Prontuario[]> {
     const response: AxiosResponse<Prontuario[]> = await this.api.get(`/prontuarios/paciente/${pacienteId}`);

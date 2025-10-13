@@ -7,9 +7,17 @@ import {
   LockOutlined,
   SettingOutlined
 } from '@ant-design/icons';
-import type { Usuario, Clinica, Psicologo, TipoUser } from '../../../types';
+import type { Usuario, Clinica, Psicologo } from '../../../types';
 import apiService from '../../../services/api';
 import { useAuth } from '../../../contexts/AuthContext';
+
+interface Role {
+  id: number;
+  nome: string;
+  descricao: string;
+  ativo: boolean;
+  sistema: boolean;
+}
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -26,7 +34,7 @@ const UsuariosForm: React.FC<UsuariosFormProps> = ({ usuario, onSuccess, onCance
   const [loadingData, setLoadingData] = useState(true);
   const [clinicas, setClinicas] = useState<Clinica[]>([]);
   const [psicologos, setPsicologos] = useState<Psicologo[]>([]);
-  const [tiposUsuario, setTiposUsuario] = useState<TipoUser[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -39,19 +47,42 @@ const UsuariosForm: React.FC<UsuariosFormProps> = ({ usuario, onSuccess, onCance
   const loadData = async () => {
     try {
       setLoadingData(true);
-      const [clinicasData, psicologosData, tiposData] = await Promise.all([
+      const [clinicasData, psicologosData, rolesData] = await Promise.all([
         apiService.getClinicas(),
         apiService.getPsicologos(),
-        apiService.getTiposUsuario()
+        loadRoles()
       ]);
 
       setClinicas(clinicasData);
       setPsicologos(psicologosData);
-      setTiposUsuario(tiposData);
+      setRoles(rolesData);
     } catch (error: any) {
       message.error('Erro ao carregar dados');
     } finally {
       setLoadingData(false);
+    }
+  };
+
+  const loadRoles = async (): Promise<Role[]> => {
+    try {
+      // Carrega roles do backend
+      const backendRoles = await apiService.getRoles();
+      console.log('Roles carregadas do backend:', backendRoles);
+      return backendRoles;
+    } catch (error) {
+      console.warn('Erro ao carregar roles do backend:', error);
+      // Fallback: tenta carregar do localStorage
+      try {
+        const savedRoles = localStorage.getItem('app-roles');
+        if (savedRoles) {
+          const parsedRoles = JSON.parse(savedRoles);
+          console.log('Roles carregadas do localStorage (fallback):', parsedRoles);
+          return parsedRoles;
+        }
+      } catch (localError) {
+        console.warn('Erro ao carregar roles do localStorage:', localError);
+      }
+      return [];
     }
   };
 
@@ -176,13 +207,22 @@ const UsuariosForm: React.FC<UsuariosFormProps> = ({ usuario, onSuccess, onCance
             </Col>
           </Row>
 
-          <Form.Item name="tipoId" label="Tipo de Usuário" rules={[{ required: true }]}>
-            <Select placeholder="Selecione">
-              {tiposUsuario.map(t => (
-                <Option key={t.id} value={t.id}>{t.nome}</Option>
-              ))}
-            </Select>
-          </Form.Item>
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item name="roleId" label="Role (Sistema de Permissões)" rules={[{ required: true, message: 'Selecione uma role' }]}>
+                <Select placeholder="Selecione uma role">
+                  {roles.filter(role => role.ativo).map(role => (
+                    <Option key={role.id} value={role.id}>
+                      <div>
+                        <div style={{ fontWeight: 'bold' }}>{role.nome}</div>
+                        <div style={{ fontSize: '12px', color: '#666' }}>{role.descricao}</div>
+                      </div>
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
         </>
       ),
     },
@@ -290,7 +330,6 @@ const UsuariosForm: React.FC<UsuariosFormProps> = ({ usuario, onSuccess, onCance
       initialValues={{
         clinicaId: user?.clinicaId || clinicas[0]?.id,
         psicologId: psicologos[0]?.id,
-        tipoId: tiposUsuario[0]?.id || 1,
         status: true,
         temaPreferido: 'light',
         idioma: 'pt-BR',

@@ -1,126 +1,81 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
-  Card, Tabs, Form, Input, Button, Space, message, Divider, Row, Col, Switch, Select, Spin, Typography, Alert, Modal, Table, Tag, Tooltip, Badge
+  Card, Tabs, Form, Input, Button, Space, message, Divider, Row, Col, Switch, Select, Typography, Alert
 } from 'antd';
 import {
-  SettingOutlined, UserOutlined, LockOutlined, MailOutlined, BellOutlined, DatabaseOutlined, SecurityScanOutlined, SendOutlined, TeamOutlined, KeyOutlined, CloudOutlined, MonitorOutlined, SaveOutlined
+  MonitorOutlined, MailOutlined, SecurityScanOutlined, BellOutlined, TeamOutlined, SaveOutlined
 } from '@ant-design/icons';
-import { useAuth } from '../contexts/AuthContext';
-import apiService from '../services/api';
-import type { Usuario } from '../types';
+import { useAppConfig } from '../hooks/useAppConfig';
+import { ConfigEffects } from '../utils/configEffects';
+import PermissionsManagement from '../components/features/permissions/PermissionsManagement';
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
-const { TextArea } = Input;
-
-interface SystemConfig {
-  // Configurações de Sistema
-  systemName: string;
-  systemVersion: string;
-  maintenanceMode: boolean;
-  debugMode: boolean;
-  
-  // Configurações de Email
-  smtpHost: string;
-  smtpPort: number;
-  smtpUsername: string;
-  smtpPassword: string;
-  smtpFromEmail: string;
-  
-  // Configurações de Backup
-  autoBackup: boolean;
-  backupFrequency: string;
-  backupRetention: number;
-  
-  // Configurações de Segurança
-  sessionTimeout: number;
-  maxLoginAttempts: number;
-  passwordPolicy: {
-    minLength: number;
-    requireUppercase: boolean;
-    requireNumbers: boolean;
-    requireSpecialChars: boolean;
-  };
-  
-  // Configurações de Notificações
-  emailNotifications: boolean;
-  smsNotifications: boolean;
-  pushNotifications: boolean;
-  
-  // Configurações de Logs
-  logLevel: string;
-  logRetention: number;
-  auditLogs: boolean;
-}
 
 const SystemSettingsPage: React.FC = () => {
-  const { user } = useAuth();
+  const { config, saveConfig, isMaintenanceMode, isDebugMode } = useAppConfig();
   const [loading, setLoading] = useState(false);
-  const [loadingData, setLoadingData] = useState(true);
-  const [systemConfig, setSystemConfig] = useState<SystemConfig | null>(null);
   const [systemForm] = Form.useForm();
   const [emailForm] = Form.useForm();
   const [securityForm] = Form.useForm();
   const [notificationForm] = Form.useForm();
 
-  useEffect(() => {
-    loadSystemConfig();
-  }, []);
+  // Inicializar formulários com valores atuais
+  React.useEffect(() => {
+    systemForm.setFieldsValue({
+      systemName: config.systemName,
+      version: config.version,
+      maintenanceMode: config.maintenanceMode,
+      debugMode: config.debugMode,
+      backupEnabled: config.backupEnabled,
+      backupFrequency: config.backupFrequency,
+      backupRetention: config.backupRetention
+    });
 
-  const loadSystemConfig = async () => {
-    try {
-      setLoadingData(true);
-      const config = await apiService.getSystemConfig();
-      
-      setSystemConfig(config);
-      systemForm.setFieldsValue(config);
-      emailForm.setFieldsValue(config);
-      securityForm.setFieldsValue({
-        sessionTimeout: config.sessionTimeout,
-        maxLoginAttempts: config.maxLoginAttempts,
-        ...config.passwordPolicy
-      });
-      notificationForm.setFieldsValue({
-        emailNotifications: config.emailNotifications,
-        smsNotifications: config.smsNotifications,
-        pushNotifications: config.pushNotifications,
-        logLevel: config.logLevel,
-        logRetention: config.logRetention,
-        auditLogs: config.auditLogs
-      });
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message 
-        || error.response?.data?.error 
-        || error.message 
-        || 'Erro ao carregar configurações do sistema';
-      message.error(errorMessage);
-      console.error('Erro ao carregar configurações do sistema:', error);
-      
-      // Se for erro 403 (sem permissão), redirecionar
-      if (error.response?.status === 403) {
-        message.warning('Você não tem permissão para acessar as configurações do sistema');
-      }
-    } finally {
-      setLoadingData(false);
-    }
-  };
+    emailForm.setFieldsValue({
+      emailEnabled: config.emailEnabled,
+      smtpHost: config.smtpHost,
+      smtpPort: config.smtpPort,
+      smtpUsername: config.smtpUsername,
+      smtpPassword: config.smtpPassword,
+      smtpFrom: config.smtpFrom,
+      smtpAuth: config.smtpAuth,
+      smtpTls: config.smtpTls
+    });
+
+    securityForm.setFieldsValue({
+      maxLoginAttempts: config.maxLoginAttempts,
+      minLength: config.passwordPolicy.minLength,
+      requireUppercase: config.passwordPolicy.requireUppercase,
+      requireNumbers: config.passwordPolicy.requireNumbers,
+      requireSpecialChars: config.passwordPolicy.requireSpecialChars
+    });
+
+    notificationForm.setFieldsValue({
+      emailNotifications: config.emailNotifications,
+      smsNotifications: config.smsNotifications,
+      pushNotifications: config.pushNotifications,
+      logLevel: config.logLevel,
+      logRetention: config.logRetention,
+      auditLogs: config.auditLogs
+    });
+  }, [config, systemForm, emailForm, securityForm, notificationForm]);
 
   const handleSystemUpdate = async (values: any) => {
     try {
       setLoading(true);
-      await apiService.updateSystemConfig({
-        category: 'SYSTEM',
-        configs: values
-      });
-      message.success('Configurações do sistema atualizadas com sucesso!');
-      await loadSystemConfig();
+      saveConfig('system', values);
+      
+      // Aplica efeitos imediatos
+      ConfigEffects.applySystemName(values.systemName);
+      ConfigEffects.applyMaintenanceMode(values.maintenanceMode);
+      ConfigEffects.applyDebugMode(values.debugMode);
+      ConfigEffects.scheduleBackup(values.backupFrequency, values.backupEnabled);
+      
+      message.success('Configurações do sistema salvas e aplicadas com sucesso!');
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message 
-        || error.response?.data?.error 
-        || error.message 
-        || 'Erro ao atualizar configurações do sistema';
-      message.error(errorMessage);
-      console.error('Erro ao atualizar configurações do sistema:', error);
+      message.error('Erro ao salvar configurações do sistema');
+      console.error('Erro:', error);
     } finally {
       setLoading(false);
     }
@@ -129,19 +84,12 @@ const SystemSettingsPage: React.FC = () => {
   const handleEmailUpdate = async (values: any) => {
     try {
       setLoading(true);
-      await apiService.updateEmailConfig({
-        category: 'EMAIL',
-        configs: values
-      });
-      message.success('Configurações de email atualizadas com sucesso!');
-      await loadSystemConfig();
+      saveConfig('email', values);
+      
+      message.success('Configurações de email salvas com sucesso!');
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message 
-        || error.response?.data?.error 
-        || error.message 
-        || 'Erro ao atualizar configurações de email';
-      message.error(errorMessage);
-      console.error('Erro ao atualizar configurações de email:', error);
+      message.error('Erro ao salvar configurações de email');
+      console.error('Erro:', error);
     } finally {
       setLoading(false);
     }
@@ -150,19 +98,12 @@ const SystemSettingsPage: React.FC = () => {
   const handleSecurityUpdate = async (values: any) => {
     try {
       setLoading(true);
-      await apiService.updateSecurityConfig({
-        category: 'SECURITY',
-        configs: values
-      });
-      message.success('Configurações de segurança atualizadas com sucesso!');
-      await loadSystemConfig();
+      saveConfig('security', values);
+      
+      message.success('Configurações de segurança salvas com sucesso!');
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message 
-        || error.response?.data?.error 
-        || error.message 
-        || 'Erro ao atualizar configurações de segurança';
-      message.error(errorMessage);
-      console.error('Erro ao atualizar configurações de segurança:', error);
+      message.error('Erro ao salvar configurações de segurança');
+      console.error('Erro:', error);
     } finally {
       setLoading(false);
     }
@@ -171,49 +112,17 @@ const SystemSettingsPage: React.FC = () => {
   const handleNotificationUpdate = async (values: any) => {
     try {
       setLoading(true);
-      await apiService.updateNotificationConfig({
-        category: 'NOTIFICATIONS',
-        configs: values
-      });
-      message.success('Configurações de notificações atualizadas com sucesso!');
-      await loadSystemConfig();
+      saveConfig('notifications', values);
+      
+      message.success('Configurações de notificações salvas com sucesso!');
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message 
-        || error.response?.data?.error 
-        || error.message 
-        || 'Erro ao atualizar configurações de notificações';
-      message.error(errorMessage);
-      console.error('Erro ao atualizar configurações de notificações:', error);
+      message.error('Erro ao salvar configurações de notificações');
+      console.error('Erro:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const testEmailConnection = async () => {
-    try {
-      setLoading(true);
-      const result = await apiService.testEmailConnection();
-      message.success(result.message || 'Conexão de email testada com sucesso!');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message 
-        || error.response?.data?.error 
-        || error.message 
-        || 'Erro ao testar conexão de email';
-      message.error(errorMessage);
-      console.error('Erro ao testar conexão de email:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loadingData) {
-    return (
-      <div style={{ textAlign: 'center', padding: '100px 0' }}>
-        <Spin size="large" />
-        <p style={{ marginTop: 16, color: '#8c8c8c' }}>Carregando configurações do sistema...</p>
-      </div>
-    );
-  }
 
   const tabItems = [
     {
@@ -239,11 +148,11 @@ const SystemSettingsPage: React.FC = () => {
                   label="Nome do Sistema"
                   rules={[{ required: true, message: 'Nome do sistema é obrigatório' }]}
                 >
-                  <Input prefix={<SettingOutlined />} placeholder="Nome do sistema" />
+                  <Input placeholder="Nome do sistema" />
                 </Form.Item>
               </Col>
               <Col xs={24} md={12}>
-                <Form.Item name="systemVersion" label="Versão do Sistema">
+                <Form.Item name="version" label="Versão do Sistema">
                   <Input disabled />
                 </Form.Item>
               </Col>
@@ -251,13 +160,18 @@ const SystemSettingsPage: React.FC = () => {
 
             <Row gutter={16}>
               <Col xs={24} md={12}>
-                <Form.Item name="maintenanceMode" label="Modo de Manutenção" valuePropName="checked">
+                <Form.Item 
+                  name="maintenanceMode" 
+                  label="Modo de Manutenção (Simulação)" 
+                  valuePropName="checked"
+                  tooltip="Adiciona banner vermelho e overlay escuro na página (apenas visual)"
+                >
                   <Switch />
                 </Form.Item>
-                {systemConfig?.maintenanceMode && (
+                {isMaintenanceMode() && (
                   <Alert 
                     message="⚠️ Sistema em Modo Manutenção" 
-                    description="Apenas administradores podem acessar o sistema"
+                    description="Banner vermelho e overlay escuro aplicados na página"
                     type="warning" 
                     showIcon 
                     style={{ marginTop: 8 }}
@@ -265,13 +179,18 @@ const SystemSettingsPage: React.FC = () => {
                 )}
               </Col>
               <Col xs={24} md={12}>
-                <Form.Item name="debugMode" label="Modo Debug" valuePropName="checked">
+                <Form.Item 
+                  name="debugMode" 
+                  label="Modo Debug (Simulação)" 
+                  valuePropName="checked"
+                  tooltip="Adiciona console debug na parte inferior da página (apenas visual)"
+                >
                   <Switch />
                 </Form.Item>
-                {systemConfig?.debugMode && (
+                {isDebugMode() && (
                   <Alert 
                     message="🐛 Modo Debug Ativo" 
-                    description="Logs detalhados estão sendo gerados"
+                    description="Console debug visível na parte inferior da página"
                     type="info" 
                     showIcon 
                     style={{ marginTop: 8 }}
@@ -285,23 +204,18 @@ const SystemSettingsPage: React.FC = () => {
             <Title level={5}>Configurações de Backup</Title>
             <Row gutter={16}>
               <Col xs={24} md={8}>
-                <Form.Item name="autoBackup" label="Backup Automático" valuePropName="checked">
+                <Form.Item 
+                  name="backupEnabled" 
+                  label="Backup Automático (Simulação)" 
+                  valuePropName="checked"
+                  tooltip="Simula download automático de backup baseado na frequência (apenas visual)"
+                >
                   <Switch />
                 </Form.Item>
-                {systemConfig?.autoBackup && (
-                  <Alert 
-                    message="✅ Backup Automático Ativo" 
-                    description={`Frequência: ${systemConfig.backupFrequency === 'daily' ? 'Diário às 3h' : systemConfig.backupFrequency}`}
-                    type="success" 
-                    showIcon 
-                    style={{ marginTop: 8 }}
-                  />
-                )}
               </Col>
               <Col xs={24} md={8}>
-                <Form.Item name="backupFrequency" label="Frequência do Backup">
+                <Form.Item name="backupFrequency" label="Frequência do Backup (Simulação)">
                   <Select>
-                    <Option value="hourly">A cada hora</Option>
                     <Option value="daily">Diário (3h da manhã)</Option>
                     <Option value="weekly">Semanal</Option>
                     <Option value="monthly">Mensal</Option>
@@ -309,7 +223,7 @@ const SystemSettingsPage: React.FC = () => {
                 </Form.Item>
               </Col>
               <Col xs={24} md={8}>
-                <Form.Item name="backupRetention" label="Retenção (dias)">
+                <Form.Item name="backupRetention" label="Retenção (dias) (Simulação)">
                   <Input type="number" min={1} max={365} />
                 </Form.Item>
               </Col>
@@ -339,80 +253,65 @@ const SystemSettingsPage: React.FC = () => {
             layout="vertical"
             onFinish={handleEmailUpdate}
           >
-            <Title level={5}>Configurações de Email</Title>
-            <Alert
-              message="🚧 Funcionalidade em Desenvolvimento"
-              description="As configurações de email podem ser salvas, mas o envio real de emails está em desenvolvimento."
-              type="warning"
-              showIcon
-              style={{ marginBottom: 16 }}
-            />
-            <Alert
-              message="Configurações SMTP"
-              description="Configure os parâmetros do servidor de email para envio de notificações."
-              type="info"
-              showIcon
-              style={{ marginBottom: 24 }}
-            />
+            <Title level={5}>Configurações de Email (Simulação)</Title>
 
             <Row gutter={16}>
               <Col xs={24} md={12}>
-                <Form.Item
-                  name="smtpHost"
-                  label="Servidor SMTP"
-                  rules={[{ required: true, message: 'Servidor SMTP é obrigatório' }]}
-                >
+                <Form.Item name="emailEnabled" label="Email Habilitado (Simulação)" valuePropName="checked">
+                  <Switch />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={12}>
+                <Form.Item name="smtpHost" label="Servidor SMTP (Simulação)">
                   <Input placeholder="smtp.gmail.com" />
                 </Form.Item>
               </Col>
+            </Row>
+
+            <Row gutter={16}>
               <Col xs={24} md={12}>
-                <Form.Item
-                  name="smtpPort"
-                  label="Porta SMTP"
-                  rules={[{ required: true, message: 'Porta SMTP é obrigatória' }]}
-                >
+                <Form.Item name="smtpPort" label="Porta SMTP (Simulação)">
                   <Input type="number" placeholder="587" />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={12}>
+                <Form.Item name="smtpUsername" label="Usuário SMTP (Simulação)">
+                  <Input placeholder="seu@email.com" />
                 </Form.Item>
               </Col>
             </Row>
 
             <Row gutter={16}>
               <Col xs={24} md={12}>
-                <Form.Item
-                  name="smtpUsername"
-                  label="Usuário SMTP"
-                  rules={[{ required: true, message: 'Usuário SMTP é obrigatório' }]}
-                >
-                  <Input placeholder="seu@email.com" />
+                <Form.Item name="smtpFrom" label="Email Remetente (Simulação)">
+                  <Input placeholder="noreply@gestaopsi.com" />
                 </Form.Item>
               </Col>
               <Col xs={24} md={12}>
-                <Form.Item
-                  name="smtpPassword"
-                  label="Senha SMTP"
-                  rules={[{ required: true, message: 'Senha SMTP é obrigatória' }]}
-                >
-                  <Input.Password placeholder="Sua senha" />
+                <Form.Item name="smtpPassword" label="Senha SMTP (Simulação)">
+                  <Input.Password placeholder="Sua senha SMTP" />
                 </Form.Item>
               </Col>
             </Row>
 
-            <Form.Item
-              name="smtpFromEmail"
-              label="Email Remetente"
-              rules={[{ required: true, message: 'Email remetente é obrigatório' }]}
-            >
-              <Input placeholder="noreply@seusite.com" />
-            </Form.Item>
+            <Row gutter={16}>
+              <Col xs={24} md={12}>
+                <Form.Item name="smtpAuth" label="Autenticação SMTP (Simulação)" valuePropName="checked">
+                  <Switch />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={12}>
+                <Form.Item name="smtpTls" label="TLS Habilitado (Simulação)" valuePropName="checked">
+                  <Switch />
+                </Form.Item>
+              </Col>
+            </Row>
 
-            <Space>
-              <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={loading}>
-                Salvar Configurações
+            <Form.Item>
+              <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={loading} block size="large">
+                Salvar Configurações de Email
               </Button>
-              <Button icon={<SendOutlined />} onClick={testEmailConnection} loading={loading}>
-                Testar Conexão
-              </Button>
-            </Space>
+            </Form.Item>
           </Form>
         </Card>
       ),
@@ -437,20 +336,11 @@ const SystemSettingsPage: React.FC = () => {
             <Row gutter={16}>
               <Col xs={24} md={12}>
                 <Form.Item
-                  name="sessionTimeout"
-                  label="Timeout da Sessão (minutos)"
-                  rules={[{ required: true, message: 'Timeout é obrigatório' }]}
-                >
-                  <Input type="number" />
-                </Form.Item>
-              </Col>
-              <Col xs={24} md={12}>
-                <Form.Item
                   name="maxLoginAttempts"
-                  label="Máximo de Tentativas de Login"
+                  label="Máximo de Tentativas de Login (Simulação)"
                   rules={[{ required: true, message: 'Máximo de tentativas é obrigatório' }]}
                 >
-                  <Input type="number" />
+                  <Input type="number" min={1} max={10} />
                 </Form.Item>
               </Col>
             </Row>
@@ -465,7 +355,7 @@ const SystemSettingsPage: React.FC = () => {
                   label="Tamanho Mínimo da Senha"
                   rules={[{ required: true, message: 'Tamanho mínimo é obrigatório' }]}
                 >
-                  <Input type="number" />
+                  <Input type="number" min={6} max={20} />
                 </Form.Item>
               </Col>
               <Col xs={24} md={12}>
@@ -512,15 +402,15 @@ const SystemSettingsPage: React.FC = () => {
             layout="vertical"
             onFinish={handleNotificationUpdate}
           >
-            <Title level={5}>Configurações de Notificações</Title>
+            <Title level={5}>Configurações de Notificações (Simulação)</Title>
             
             <Space direction="vertical" style={{ width: '100%' }} size="large">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <Text strong>Notificações por Email</Text>
+                  <Text strong>Notificações por Email (Simulação)</Text>
                   <br />
                   <Text type="secondary" style={{ fontSize: '13px' }}>
-                    Habilitar envio de notificações por email
+                    Habilitar envio de notificações por email (apenas visual)
                   </Text>
                 </div>
                 <Form.Item name="emailNotifications" valuePropName="checked" noStyle>
@@ -530,10 +420,10 @@ const SystemSettingsPage: React.FC = () => {
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <Text strong>Notificações por SMS</Text>
+                  <Text strong>Notificações por SMS (Simulação)</Text>
                   <br />
                   <Text type="secondary" style={{ fontSize: '13px' }}>
-                    Habilitar envio de notificações por SMS
+                    Habilitar envio de notificações por SMS (apenas visual)
                   </Text>
                 </div>
                 <Form.Item name="smsNotifications" valuePropName="checked" noStyle>
@@ -543,10 +433,10 @@ const SystemSettingsPage: React.FC = () => {
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <Text strong>Notificações Push</Text>
+                  <Text strong>Notificações Push (Simulação)</Text>
                   <br />
                   <Text type="secondary" style={{ fontSize: '13px' }}>
-                    Habilitar notificações push no navegador
+                    Habilitar notificações push no navegador (apenas visual)
                   </Text>
                 </div>
                 <Form.Item name="pushNotifications" valuePropName="checked" noStyle>
@@ -557,10 +447,10 @@ const SystemSettingsPage: React.FC = () => {
 
             <Divider />
 
-            <Title level={5}>Configurações de Logs</Title>
+            <Title level={5}>Configurações de Logs (Simulação)</Title>
             <Row gutter={16}>
               <Col xs={24} md={12}>
-                <Form.Item name="logLevel" label="Nível de Log">
+                <Form.Item name="logLevel" label="Nível de Log (Simulação)">
                   <Select>
                     <Option value="DEBUG">DEBUG</Option>
                     <Option value="INFO">INFO</Option>
@@ -570,13 +460,13 @@ const SystemSettingsPage: React.FC = () => {
                 </Form.Item>
               </Col>
               <Col xs={24} md={12}>
-                <Form.Item name="logRetention" label="Retenção de Logs (dias)">
-                  <Input type="number" />
+                <Form.Item name="logRetention" label="Retenção de Logs (dias) (Simulação)">
+                  <Input type="number" min={1} max={365} />
                 </Form.Item>
               </Col>
             </Row>
 
-            <Form.Item name="auditLogs" label="Logs de Auditoria" valuePropName="checked">
+            <Form.Item name="auditLogs" label="Logs de Auditoria (Simulação)" valuePropName="checked">
               <Switch />
             </Form.Item>
 
@@ -598,24 +488,7 @@ const SystemSettingsPage: React.FC = () => {
         </span>
       ),
       children: (
-        <Card bordered={false}>
-          <Title level={5}>Gestão de Permissões</Title>
-          <Alert
-            message="Configurações de Permissões"
-            description="Gerencie os níveis de acesso e permissões dos usuários no sistema."
-            type="info"
-            showIcon
-            style={{ marginBottom: 24 }}
-          />
-          
-          <div style={{ textAlign: 'center', padding: '60px 0' }}>
-            <DatabaseOutlined style={{ fontSize: 48, color: '#1890ff', marginBottom: 16 }} />
-            <Title level={4}>Módulo em Desenvolvimento</Title>
-            <Paragraph type="secondary">
-              A gestão avançada de permissões será implementada em breve.
-            </Paragraph>
-          </div>
-        </Card>
+        <PermissionsManagement />
       ),
     }
   ];

@@ -8,6 +8,7 @@ interface UserInfo {
   clinicaId: number;
   psicologId: number;
   tipoUser: string;
+  role: string; // ADMIN, USER, etc
   clinicaNome: string;
   psicologoNome: string;
   tituloSite: string;
@@ -55,6 +56,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         clinicaId,
         psicologId,
         tipoUser,
+        role: tipoUser, // Mapeia tipoUser para role (ADMIN, USER, etc)
         clinicaNome,
         psicologoNome,
         tituloSite

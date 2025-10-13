@@ -346,6 +346,7 @@ export interface Cor {
 export interface LoginRequest {
   username: string;
   password: string;
+  clinicaLogin?: string;
 }
 
 export interface LoginResponse {

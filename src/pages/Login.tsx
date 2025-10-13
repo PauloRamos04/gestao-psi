@@ -221,6 +221,18 @@ const Login: React.FC = () => {
                 </Form.Item>
 
                 <Form.Item
+                  name="clinicaLogin"
+                  label={<Text strong style={{ color: '#374151' }}>Clínica</Text>}
+                  rules={[{ required: true, message: 'Por favor, insira o login da clínica!' }]}
+                >
+                  <Input
+                    prefix={<SafetyOutlined style={{ color: '#9ca3af' }} />}
+                    placeholder="Digite o login da clínica"
+                    autoComplete="organization"
+                  />
+                </Form.Item>
+
+                <Form.Item
                   name="password"
                   label={<Text strong style={{ color: '#374151' }}>Senha</Text>}
                   rules={[{ required: true, message: 'Por favor, insira sua senha!' }]}
@@ -230,6 +242,19 @@ const Login: React.FC = () => {
                     placeholder="Digite sua senha"
                     iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
                   />
+                </Form.Item>
+
+                <Form.Item>
+                  <a 
+                    href="/forgot-password" 
+                    style={{ 
+                      color: '#667eea',
+                      fontSize: '14px',
+                      textDecoration: 'none'
+                    }}
+                  >
+                    Esqueci minha senha
+                  </a>
                 </Form.Item>
 
                 <Form.Item style={{ marginTop: '40px' }}>
