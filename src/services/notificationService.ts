@@ -364,3 +364,4 @@ export class NotificationService {
     console.log('🔔 Dados de notificações e logs limpos');
   }
 }
+
