@@ -357,23 +357,12 @@ const PsicologosForm: React.FC<PsicologosFormProps> = ({ psicologo, onSuccess, o
       children: (
         <>
           <Row gutter={16}>
-            <Col span={8}>
+            <Col span={12}>
               <Form.Item name="dtAtivacao" label="Data de Ativação">
                 <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
               </Form.Item>
             </Col>
-            <Col span={8}>
-              <Form.Item name="valorConsulta" label="Valor da Consulta (R$)">
-                <InputNumber 
-                  style={{ width: '100%' }}
-                  min={0}
-                  precision={2}
-                  placeholder="150.00"
-                  prefix="R$"
-                />
-              </Form.Item>
-            </Col>
-            <Col span={8}>
+            <Col span={12}>
               <Form.Item name="duracaoSessaoMinutos" label="Duração Sessão (min)">
                 <InputNumber style={{ width: '100%' }} min={15} max={180} placeholder="50" />
               </Form.Item>

@@ -144,6 +144,12 @@ const SessoesForm: React.FC<SessoesFormProps> = ({ sessao, onSuccess, onCancel }
         <Select
           placeholder="Selecione a sala (opcional)"
           allowClear
+          showSearch
+          optionFilterProp="children"
+          filterOption={(input, option) =>
+            String(option?.children || '').toLowerCase().includes(input.toLowerCase())
+          }
+          notFoundContent={salas.length === 0 ? "Nenhuma sala cadastrada" : undefined}
         >
           {salas.map(s => (
             <Option key={s.id} value={s.id}>{s.nome}</Option>

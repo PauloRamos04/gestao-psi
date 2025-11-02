@@ -554,7 +554,15 @@ const ReportsPage: React.FC = () => {
                       border: selectedReport === report.key ? '2px solid #1890ff' : '1px solid #d9d9d9',
                       cursor: 'pointer'
                     }}
-                    onClick={() => setSelectedReport(report.key)}
+                    onClick={() => {
+                      setSelectedReport(report.key);
+                      // Se for tipo patients ou se já tem período selecionado, gera automaticamente
+                      if (report.key === 'patients' || dateRange) {
+                        setTimeout(() => {
+                          loadReportData();
+                        }, 100);
+                      }
+                    }}
                   >
                     <Space direction="vertical" size="small" style={{ width: '100%' }}>
                       <div style={{ textAlign: 'center' }}>

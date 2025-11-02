@@ -49,10 +49,14 @@ const UsuariosList: React.FC = () => {
   const loadUsuarios = async () => {
     try {
       setLoading(true);
+      setError('');
       const data = await apiService.getUsuarios();
       setUsuarios(data);
     } catch (err: any) {
-      setError('Erro ao carregar usuários');
+      const errorMsg = err.response?.data?.message || err.message || 'Erro ao carregar usuários';
+      setError(errorMsg);
+      console.error('Erro ao carregar usuários:', err);
+      message.error(errorMsg);
     } finally {
       setLoading(false);
     }
