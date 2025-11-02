@@ -139,11 +139,28 @@ const LogsPage: React.FC = () => {
       render: (data: string) => {
         try {
           if (!data) return '-';
-          // Parse da data - aceita tanto ISO quanto outros formatos
+          // Parse da data
+          // O backend está configurado para usar America/Sao_Paulo (UTC-3)
+          // Mas quando serializa LocalDateTime para JSON, pode estar em UTC
+          // Precisamos ajustar subtraindo 3 horas se a data vier sem timezone
           let date: Date;
           if (data.includes('T')) {
-            // Formato ISO com timezone
-            date = parseISO(data);
+            // Formato ISO
+            const isoDate = parseISO(data);
+            // Se não tem timezone explícito (não termina com Z ou +/-HH:MM)
+            // O parseISO vai interpretar como horário local do navegador
+            // Mas se o backend salvou em UTC e serializou sem timezone,
+            // precisamos ajustar: subtrair 3 horas (UTC-3 = Brasília)
+            if (!data.endsWith('Z') && !data.match(/[+-]\d{2}:\d{2}$/)) {
+              // Assumir que veio de UTC e ajustar para UTC-3 (Brasília)
+              // Subtraindo 3 horas em milissegundos (3 * 60 * 60 * 1000)
+              date = new Date(isoDate.getTime() - (3 * 60 * 60 * 1000));
+            } else if (data.endsWith('Z')) {
+              // Se tem Z (UTC), subtrair 3 horas para converter para Brasília
+              date = new Date(isoDate.getTime() - (3 * 60 * 60 * 1000));
+            } else {
+              date = isoDate;
+            }
           } else if (data.includes('-') || data.includes('/')) {
             // Outros formatos de data
             date = new Date(data);
@@ -377,9 +394,20 @@ const LogsPage: React.FC = () => {
                 <Text strong>Data/Hora:</Text> {
                   (() => {
                     try {
-                      const date = selectedLog.dataHora.includes('T') 
-                        ? parseISO(selectedLog.dataHora) 
-                        : new Date(selectedLog.dataHora);
+                      let date: Date;
+                      if (selectedLog.dataHora.includes('T')) {
+                        const isoDate = parseISO(selectedLog.dataHora);
+                        // Ajustar timezone: subtrair 3 horas se não tiver timezone explícito ou se for UTC
+                        if (!selectedLog.dataHora.endsWith('Z') && !selectedLog.dataHora.match(/[+-]\d{2}:\d{2}$/)) {
+                          date = new Date(isoDate.getTime() - (3 * 60 * 60 * 1000));
+                        } else if (selectedLog.dataHora.endsWith('Z')) {
+                          date = new Date(isoDate.getTime() - (3 * 60 * 60 * 1000));
+                        } else {
+                          date = isoDate;
+                        }
+                      } else {
+                        date = new Date(selectedLog.dataHora);
+                      }
                       return format(date, 'dd/MM/yyyy HH:mm:ss');
                     } catch (e) {
                       return selectedLog.dataHora;
