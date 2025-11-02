@@ -27,7 +27,7 @@ import {
   EyeOutlined,
   LockOutlined
 } from '@ant-design/icons';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import apiService from '../services/api';
 import { usePermissions } from '../hooks/usePermissions';
 import type { LogAuditoria } from '../types';
@@ -43,6 +43,8 @@ const LogsPage: React.FC = () => {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
   const [size, setSize] = useState(50);
+  const [sortField, setSortField] = useState<string>('dataHora');
+  const [sortOrder, setSortOrder] = useState<string>('DESC');
   const [selectedLog, setSelectedLog] = useState<LogAuditoria | null>(null);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
 
@@ -53,12 +55,12 @@ const LogsPage: React.FC = () => {
 
   useEffect(() => {
     loadLogs();
-  }, [page, size]);
+  }, [page, size, sortField, sortOrder]);
 
   const loadLogs = async () => {
     setLoading(true);
     try {
-      const response = await apiService.getLogs(page, size);
+      const response = await apiService.getLogs(page, size, sortField, sortOrder);
       setLogs(response.content || response);
       setTotal(response.totalElements || 0);
     } catch (error) {
@@ -134,9 +136,34 @@ const LogsPage: React.FC = () => {
       dataIndex: 'dataHora',
       key: 'dataHora',
       width: 160,
-      render: (data: string) => format(new Date(data), 'dd/MM/yyyy HH:mm:ss'),
-      sorter: (a: LogAuditoria, b: LogAuditoria) => 
-        new Date(a.dataHora).getTime() - new Date(b.dataHora).getTime(),
+      render: (data: string) => {
+        try {
+          if (!data) return '-';
+          // Parse da data - aceita tanto ISO quanto outros formatos
+          let date: Date;
+          if (data.includes('T')) {
+            // Formato ISO com timezone
+            date = parseISO(data);
+          } else if (data.includes('-') || data.includes('/')) {
+            // Outros formatos de data
+            date = new Date(data);
+          } else {
+            return data;
+          }
+          
+          // Verifica se a data é válida
+          if (isNaN(date.getTime())) {
+            return data;
+          }
+          
+          return format(date, 'dd/MM/yyyy HH:mm:ss');
+        } catch (e) {
+          console.error('Erro ao formatar data:', e, data);
+          return data; // Se falhar, retorna o valor original
+        }
+      },
+      sorter: true,
+      defaultSortOrder: 'descend' as any,
     },
     {
       title: 'Usuário',
@@ -293,21 +320,35 @@ const LogsPage: React.FC = () => {
 
       {/* Tabela de Logs */}
       <Card>
-        <Table
+          <Table
           columns={columns}
           dataSource={logs}
           rowKey="id"
           loading={loading}
+          onChange={(pagination, filters, sorter: any) => {
+            // Atualizar página e tamanho
+            if (pagination.current) setPage(pagination.current - 1);
+            if (pagination.pageSize) setSize(pagination.pageSize);
+            
+            // Atualizar ordenação
+            // sorter pode ser um objeto ou array
+            const sort = Array.isArray(sorter) ? sorter[0] : sorter;
+            
+            if (sort && sort.field) {
+              setSortField(sort.field);
+              setSortOrder(sort.order === 'ascend' ? 'ASC' : 'DESC');
+            } else {
+              // Se limpar ordenação, volta para padrão (dataHora DESC)
+              setSortField('dataHora');
+              setSortOrder('DESC');
+            }
+          }}
           pagination={{
             current: page + 1,
             pageSize: size,
             total: total,
             showSizeChanger: true,
             showTotal: (total, range) => `${range[0]}-${range[1]} de ${total} registros`,
-            onChange: (newPage, newSize) => {
-              setPage(newPage - 1);
-              if (newSize) setSize(newSize);
-            },
             pageSizeOptions: ['20', '50', '100', '200']
           }}
           scroll={{ x: 1200 }}
@@ -333,7 +374,18 @@ const LogsPage: React.FC = () => {
                 <Text strong>ID:</Text> {selectedLog.id}
               </Col>
               <Col span={12}>
-                <Text strong>Data/Hora:</Text> {format(new Date(selectedLog.dataHora), 'dd/MM/yyyy HH:mm:ss')}
+                <Text strong>Data/Hora:</Text> {
+                  (() => {
+                    try {
+                      const date = selectedLog.dataHora.includes('T') 
+                        ? parseISO(selectedLog.dataHora) 
+                        : new Date(selectedLog.dataHora);
+                      return format(date, 'dd/MM/yyyy HH:mm:ss');
+                    } catch (e) {
+                      return selectedLog.dataHora;
+                    }
+                  })()
+                }
               </Col>
               <Col span={12}>
                 <Text strong>Usuário:</Text> {selectedLog.username || 'SYSTEM'}

@@ -448,10 +448,11 @@ class ApiService {
   }
 
   // ==================== LOGS DE AUDITORIA ====================
-  async getLogs(page = 0, size = 50) {
-    const response = await this.api.get('/logs', {
-      params: { page, size }
-    });
+  async getLogs(page = 0, size = 50, sort?: string, order?: string) {
+    const params: any = { page, size };
+    if (sort) params.sort = sort;
+    if (order) params.order = order;
+    const response = await this.api.get('/logs', { params });
     return response.data;
   }
 
