@@ -33,6 +33,7 @@ const PsicologosForm: React.FC<PsicologosFormProps> = ({ psicologo, onSuccess, o
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [criarUsuario, setCriarUsuario] = useState(false);
   const [buscandoCep, setBuscandoCep] = useState(false);
+  const [activeTab, setActiveTab] = useState('1');
 
   useEffect(() => {
     loadCategorias();
@@ -87,6 +88,53 @@ const PsicologosForm: React.FC<PsicologosFormProps> = ({ psicologo, onSuccess, o
   };
 
   const handleSubmit = async (values: any) => {
+    // Primeiro, validar TODOS os campos de TODAS as abas
+    try {
+      // Validar todos os campos do formulário (incluindo os de todas as abas)
+      // O Ant Design vai validar automaticamente campos condicionais baseado nas regras
+      await form.validateFields();
+    } catch (validationError: any) {
+      // Se houver erros de validação, mostrar mensagens e focar na aba correta
+      if (validationError.errorFields && validationError.errorFields.length > 0) {
+        const firstError = validationError.errorFields[0];
+        const fieldName = firstError.name[0];
+        
+        // Determinar qual aba contém o campo com erro
+        let tabToFocus = '1';
+        if (fieldName === 'nome' || fieldName === 'cpf' || fieldName === 'rg' || fieldName === 'crp' || 
+            fieldName === 'email' || fieldName === 'telefone' || fieldName === 'celular' || 
+            fieldName === 'dataNascimento' || fieldName === 'genero' || fieldName === 'estadoCivil') {
+          tabToFocus = '1'; // Dados Básicos
+        } else if (fieldName === 'cep' || fieldName === 'logradouro' || fieldName === 'numeroEndereco' || 
+                   fieldName === 'complemento' || fieldName === 'bairro' || fieldName === 'cidade' || fieldName === 'estado') {
+          tabToFocus = '2'; // Endereço
+        } else if (fieldName === 'universidadeFormacao' || fieldName === 'anoFormacao' || 
+                   fieldName === 'formacaoAcademica' || fieldName === 'especializacoes' || 
+                   fieldName === 'abordagemTerapeutica' || fieldName === 'anosExperiencia' || 
+                   fieldName === 'areasAtuacao') {
+          tabToFocus = '3'; // Formação
+        } else if (fieldName === 'categoriaId' || fieldName === 'dtAtivacao') {
+          tabToFocus = '4'; // Profissional
+        } else if (fieldName === 'username' || fieldName === 'senha' || fieldName === 'tipoUserId') {
+          tabToFocus = '5'; // Criar Usuário
+        }
+        
+        // Focar na aba com erro
+        setActiveTab(tabToFocus);
+        
+        // Mostrar mensagens de erro específicas para cada campo
+        validationError.errorFields.forEach((error: any) => {
+          const fieldLabel = getFieldLabel(error.name[0]);
+          const errorMessage = error.errors[0] || `${fieldLabel} é obrigatório`;
+          message.error(`${fieldLabel}: ${errorMessage}`, 5);
+        });
+      } else {
+        // Se não houver errorFields mas ainda houver erro, mostrar mensagem genérica
+        message.error('Por favor, preencha todos os campos obrigatórios.', 5);
+      }
+      return; // Parar aqui se houver erros de validação
+    }
+
     setLoading(true);
     try {
       const data = {
@@ -119,10 +167,124 @@ const PsicologosForm: React.FC<PsicologosFormProps> = ({ psicologo, onSuccess, o
 
       onSuccess();
     } catch (error: any) {
-      message.error(error.response?.data?.message || 'Erro ao salvar psicólogo');
+      // Garantir que sempre mostre pelo menos um toast
+      let errorShown = false;
+      
+      if (error.response) {
+        const status = error.response.status;
+        const errorData = error.response.data || {};
+        
+        if (status === 400) {
+          // Erro de validação (Bad Request) - mostrar cada erro individualmente
+          
+          // Verificar se errors existe e é um objeto (Map<String, String> do backend)
+          if (errorData.errors && typeof errorData.errors === 'object' && !Array.isArray(errorData.errors)) {
+            // Objeto com erros por campo (formato do ValidationErrorResponse)
+            const entries = Object.entries(errorData.errors);
+            if (entries.length > 0) {
+              entries.forEach(([field, errorMessage]: [string, any]) => {
+                const fieldName = getFieldLabel(field);
+                const messageText = typeof errorMessage === 'string' ? errorMessage : String(errorMessage);
+                setTimeout(() => {
+                  message.error(`${fieldName}: ${messageText}`, 5);
+                }, 100);
+                errorShown = true;
+              });
+            }
+          } else if (errorData.errors && Array.isArray(errorData.errors)) {
+            // Se for um array de erros (formato alternativo)
+            errorData.errors.forEach((err: any, index: number) => {
+              setTimeout(() => {
+                if (err.defaultMessage) {
+                  message.error(err.defaultMessage, 5);
+                } else if (typeof err === 'string') {
+                  message.error(err, 5);
+                } else {
+                  message.error('Erro de validação', 5);
+                }
+              }, 100 * (index + 1));
+              errorShown = true;
+            });
+          }
+          
+          // Se não mostrou nenhum erro específico, mostrar mensagem genérica ou do servidor
+          if (!errorShown) {
+            setTimeout(() => {
+              if (errorData?.message) {
+                message.error(errorData.message, 6);
+              } else {
+                message.error('Erro de validação. Verifique os campos obrigatórios.', 6);
+              }
+            }, 100);
+            errorShown = true;
+          }
+        } else if (status === 401) {
+          setTimeout(() => {
+            message.error('Não autorizado. Faça login novamente.', 5);
+          }, 100);
+          errorShown = true;
+        } else if (status === 403) {
+          setTimeout(() => {
+            message.error('Sem permissão para realizar esta ação.', 5);
+          }, 100);
+          errorShown = true;
+        } else if (status === 404) {
+          setTimeout(() => {
+            message.error('Recurso não encontrado.', 5);
+          }, 100);
+          errorShown = true;
+        } else if (status === 500) {
+          setTimeout(() => {
+            message.error('Erro interno do servidor. Tente novamente mais tarde.', 6);
+          }, 100);
+          errorShown = true;
+        } else if (errorData?.message) {
+          setTimeout(() => {
+            message.error(errorData.message, 6);
+          }, 100);
+          errorShown = true;
+        } else {
+          setTimeout(() => {
+            message.error(`Erro ao salvar psicólogo (Status: ${status})`, 5);
+          }, 100);
+          errorShown = true;
+        }
+      } else if (error.message) {
+        setTimeout(() => {
+          message.error(error.message, 5);
+        }, 100);
+        errorShown = true;
+      }
+      
+      // Garantir que sempre mostre um erro se nada foi mostrado até agora
+      if (!errorShown) {
+        setTimeout(() => {
+          message.error('Erro ao salvar psicólogo. Verifique sua conexão.', 5);
+        }, 100);
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  // Função auxiliar para traduzir nomes de campos
+  const getFieldLabel = (field: string): string => {
+    const labels: Record<string, string> = {
+      'nome': 'Nome',
+      'categoriaId': 'Categoria',
+      'cpf': 'CPF',
+      'rg': 'RG',
+      'crp': 'CRP',
+      'email': 'E-mail',
+      'telefone': 'Telefone',
+      'celular': 'Celular',
+      'dataNascimento': 'Data de Nascimento',
+      'genero': 'Gênero',
+      'estadoCivil': 'Estado Civil',
+      'dtAtivacao': 'Data de Ativação',
+      'categoria': 'Categoria',
+    };
+    return labels[field] || field;
   };
 
   if (loadingData) {
@@ -455,11 +617,43 @@ const PsicologosForm: React.FC<PsicologosFormProps> = ({ psicologo, onSuccess, o
               borderRadius: '4px',
               marginTop: 16 
             }}>
-              <Form.Item name="username" label="Username (Login)" rules={[{ required: criarUsuario, message: 'Username é obrigatório' }]}>
+              <Form.Item 
+                name="username" 
+                label="Username (Login)" 
+                rules={[
+                  { 
+                    required: criarUsuario, 
+                    message: 'Username é obrigatório',
+                    validator: async (_, value) => {
+                      if (criarUsuario && !value) {
+                        throw new Error('Username é obrigatório');
+                      }
+                    }
+                  }
+                ]}
+              >
                 <Input placeholder="Ex: joao.silva" />
               </Form.Item>
 
-              <Form.Item name="senha" label="Senha" rules={[{ required: criarUsuario, min: 6, message: 'Senha deve ter no mínimo 6 caracteres' }]}>
+              <Form.Item 
+                name="senha" 
+                label="Senha" 
+                rules={[
+                  { 
+                    required: criarUsuario, 
+                    message: 'Senha é obrigatória',
+                    min: 6,
+                    validator: async (_, value) => {
+                      if (criarUsuario && !value) {
+                        throw new Error('Senha é obrigatória');
+                      }
+                      if (criarUsuario && value && value.length < 6) {
+                        throw new Error('Senha deve ter no mínimo 6 caracteres');
+                      }
+                    }
+                  }
+                ]}
+              >
                 <Input.Password placeholder="Mínimo 6 caracteres" />
               </Form.Item>
 
@@ -500,13 +694,14 @@ const PsicologosForm: React.FC<PsicologosFormProps> = ({ psicologo, onSuccess, o
     },
   ];
 
+
   return (
     <Form
       form={form}
       layout="vertical"
       onFinish={handleSubmit}
       initialValues={{
-        categoriaId: categorias[0]?.id,
+        categoriaId: categorias.length > 0 ? categorias[0].id : undefined,
         dtAtivacao: dayjs(),
         ativo: true,
         aceitaConvenio: false,
@@ -518,14 +713,21 @@ const PsicologosForm: React.FC<PsicologosFormProps> = ({ psicologo, onSuccess, o
         tabPosition="left"
         style={{ minHeight: 400 }}
         tabBarStyle={{ width: 200 }}
+        activeKey={activeTab}
+        onChange={setActiveTab}
       />
 
       <Form.Item style={{ marginTop: 24 }}>
         <Space>
-          <Button type="primary" htmlType="submit" loading={loading}>
+          <Button 
+            type="primary" 
+            htmlType="submit" 
+            loading={loading} 
+            size="large"
+          >
             {psicologo ? 'Atualizar' : 'Cadastrar'}
           </Button>
-          <Button onClick={onCancel}>Cancelar</Button>
+          <Button onClick={onCancel} size="large">Cancelar</Button>
         </Space>
       </Form.Item>
     </Form>

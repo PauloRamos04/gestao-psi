@@ -36,7 +36,9 @@ const SalasList: React.FC = () => {
   }, []);
 
   const loadSalas = async () => {
-    if (!user?.clinicaId) return;
+    if (!user?.clinicaId) {
+      return;
+    }
     
     setLoading(true);
     try {
@@ -72,7 +74,11 @@ const SalasList: React.FC = () => {
   const handleSuccess = () => {
     setModalVisible(false);
     setEditingSala(undefined);
-    loadSalas();
+    // Resetar form se necessário
+    // Recarregar a lista - usar setTimeout para garantir que o modal feche primeiro
+    setTimeout(() => {
+      loadSalas();
+    }, 200);
   };
 
   const columns = [

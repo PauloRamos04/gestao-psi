@@ -1,6 +1,24 @@
 const CompressionPlugin = require('compression-webpack-plugin');
 
 module.exports = function override(config, env) {
+  // Garantir que o hot reload está ativo em desenvolvimento
+  if (env === 'development') {
+    // Habilita Fast Refresh (hot reload do React)
+    config.optimization = {
+      ...config.optimization,
+    };
+    
+    // Garante que o devServer está configurado corretamente
+    if (!config.devServer) {
+      config.devServer = {};
+    }
+    
+    // Configurações para hot reload
+    config.devServer.hot = true;
+    config.devServer.liveReload = true;
+    config.devServer.inline = true;
+  }
+  
   if (env === 'production') {
     // Adicionar compressão Gzip
     config.plugins.push(
